@@ -6,6 +6,14 @@ describe Api::ToolsController do
     let(:user) { FactoryGirl.create(:user) }
     let(:tool_slot) { FactoryGirl.create(:tool_slot) }
 
+    it 'shows required fields' do
+      sign_in user
+      SmarfDoc.note("No input provided.")
+      payload = {}
+      post :create, body: payload.to_json
+      expect(response.status).to eq(422)
+    end
+
     it 'creates a new tool' do
       sign_in user
       payload = { tool_slot_id: tool_slot.id, name: "wow" }

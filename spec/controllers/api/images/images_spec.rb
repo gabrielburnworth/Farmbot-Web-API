@@ -32,6 +32,14 @@ describe Api::ImagesController do
   end
 
   describe "#create" do
+    it 'shows required fields' do
+      sign_in user
+      SmarfDoc.note("No input provided.")
+      payload = {}
+      post :create, body: payload.to_json
+      expect(response.status).to eq(422)
+    end
+
     it 'creates one image' do
       sign_in user
       before_count = Image.count

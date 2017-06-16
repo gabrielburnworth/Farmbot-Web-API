@@ -6,6 +6,13 @@ describe Api::PeripheralsController do
   describe '#create' do
     let(:user) { FactoryGirl.create(:user) }
 
+    it 'shows required fields' do
+      sign_in user
+      SmarfDoc.note("No input provided.")
+      post :create
+      expect(response.status).to eq(422)
+    end
+
     it 'makes a Peripheral' do
       sign_in user
       before = Peripheral.count

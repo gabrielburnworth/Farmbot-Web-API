@@ -6,6 +6,30 @@ describe Api::PointsController do
     let(:user) { FactoryGirl.create(:user) }
     let(:device) { user.device }
 
+    # it 'shows required fields' do
+    #   sign_in user
+    #   SmarfDoc.note("ToolSlot: no input provided.")
+    #   payload = {pointer_type: "ToolSlot"}
+    #   post :create, body: payload.to_json
+    #   expect(response.status).to eq(422)
+    # end
+
+    it 'shows required fields' do
+      sign_in user
+      SmarfDoc.note("Plant: no input provided.")
+      payload = {pointer_type: "Plant"}
+      post :create, body: payload.to_json
+      expect(response.status).to eq(422)
+    end
+
+    it 'shows required fields' do
+      sign_in user
+      SmarfDoc.note("GenericPointer: no input provided.")
+      payload = {pointer_type: "GenericPointer"}
+      post :create, body: payload.to_json
+      expect(response.status).to eq(422)
+    end
+
     it 'creates a tool slot' do
       sign_in user
       payload = { name: "Fooo", x: 4, y: 5, z: 6, pointer_type: "ToolSlot" }

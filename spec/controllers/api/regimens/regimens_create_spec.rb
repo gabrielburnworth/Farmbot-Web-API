@@ -7,10 +7,18 @@ describe Api::RegimensController do
   describe '#create' do
     let(:user) { FactoryGirl.create(:user) }
     let(:sequence) { FactoryGirl.create(:sequence, device: user.device) }
+
+    it 'shows required fields' do
+      sign_in user
+      SmarfDoc.note("No input provided.")
+      post :create
+      expect(response.status).to eq(422)
+    end
+
     it 'creates a new regimen' do
       sign_in user
       color = %w(blue green yellow orange purple pink gray red).sample
-      
+
       name = (1..3).map{ Faker::Pokemon.name }.join(" ")
       payload = {
           name: name,

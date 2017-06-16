@@ -12,6 +12,14 @@ describe Api::SequencesController do
     let(:user) { FactoryGirl.create(:user) }
     let(:nodes) { sequence_body_for(user) }
 
+    it 'shows required fields' do
+      sign_in user
+      SmarfDoc.note("No input provided.")
+      payload = {}
+      post :create, body: payload.to_json
+      expect(response.status).to eq(422)
+    end
+
     it 'handles a well formed AST in the body attribute' do
       sign_in user
       input = { name: "Scare Birds",

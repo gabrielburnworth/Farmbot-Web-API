@@ -8,6 +8,13 @@ describe Api::FarmEventsController do
     let(:sequence) { FactoryGirl.create(:sequence) }
     let(:regimen) { FactoryGirl.create(:regimen, device: user.device) }
 
+    it 'shows required fields' do
+      sign_in user
+      SmarfDoc.note("No input provided.")
+      post :create
+      expect(response.status).to eq(422)
+    end
+
     it 'makes a farm_event' do
       sign_in user
       SmarfDoc.note("This is how you could create a FarmEvent that fires " +
