@@ -7,6 +7,7 @@ import { WeedDetectorSlider } from "./slider";
 import { TaggedImage } from "../../resources/tagged_resources";
 import { t } from "i18next";
 import * as _ from "lodash";
+import { WD_ENV } from "./remote_env/interfaces";
 
 const RANGES = {
   H: { LOWEST: 0, HIGHEST: 179 },
@@ -38,6 +39,7 @@ interface Props extends NumericValues {
   currentImage: TaggedImage | undefined;
   images: TaggedImage[];
   onChange(key: NumericKeyName, value: number): void;
+  env: Partial<WD_ENV>;
 }
 
 /** Mapping of HSV values to FBOS Env variables. */
@@ -104,7 +106,8 @@ export class ImageWorkspace extends React.Component<Props, {}> {
           <FarmbotColorPicker
             h={[H_LO, H_HI]}
             s={[S_LO, S_HI]}
-            v={[V_LO, V_HI]} />
+            v={[V_LO, V_HI]}
+            env={this.props.env} />
         </div>
       </div>
       <div className="row">

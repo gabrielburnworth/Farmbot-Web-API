@@ -2,6 +2,8 @@ import * as React from "react";
 import { Hue, Saturation } from "react-color/lib/components/common";
 import { FarmbotPickerProps } from "./index";
 import * as _ from "lodash";
+import { envGet } from "./weed_detector/remote_env/selectors";
+import { WD_ENV } from "./weed_detector/remote_env/interfaces";
 
 /** Wrapper class around `react-color`'s `<Saturation />` and `<Hue />`.
  *  Add an extra white box feature for showing user weed detection settings.
@@ -36,14 +38,19 @@ export class FarmbotColorPicker extends React.Component<FarmbotPickerProps, {}> 
     return { position, width, paddingBottom, overflow };
   }
 
-  hueboxCSS = (): React.CSSProperties => {
+  hueboxCSS = (props: Partial<WD_ENV>): React.CSSProperties => {
     let l = ((this.props.h[0] * 2) / 360) * 100;
     let w = ((this.props.h[1] * 2) / 360) * 100 - l;
     let width = `${w}%`;
     let left = `${l}%`;
     let height = "100%";
     let top = 0;
-    return { ...this.BASE_CSS, width, height, top, left };
+    let backgroundColor = "rgba(0, 0, 0, 0)"
+    let hueInvert = envGet("CAMERA_CALIBRATION_invert_hue_selection", props)
+    if (hueInvert == 1) {
+      backgroundColor = "rgba(0, 0, 0, 0.9)";
+    }
+    return { ...this.BASE_CSS, width, height, top, left, backgroundColor };
   }
 
   saturationboxCSS = (): React.CSSProperties => {
@@ -82,7 +89,7 @@ export class FarmbotColorPicker extends React.Component<FarmbotPickerProps, {}> 
           {...dontTouchThis as any}
           pointer={this.customPointer}
           onChange={_.noop} />
-        <div style={this.hueboxCSS()} />
+        <div style={this.hueboxCSS(this.props.env)} />
       </div>
       <div style={{ width: "100%", paddingBottom: "2%" }} />
       <div style={this.saturationCSS()}>

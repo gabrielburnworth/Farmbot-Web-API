@@ -17,7 +17,8 @@ describe("<Body/>", () => {
       V_LO: 6,
       H_HI: 8,
       S_HI: 10,
-      V_HI: 12
+      V_HI: 12,
+      env: {"CAMERA_CALIBRATION_invert_hue_selection": 1}
     }
   }
 
