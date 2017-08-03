@@ -25,6 +25,7 @@ export class FarmwarePage extends React.Component<FarmwareProps, {}> {
           <FarmwarePanel
             syncStatus={this.props.syncStatus}
             farmwares={this.props.farmwares}
+            jobs={this.props.jobs}
           />
         </Col>
       </Row>

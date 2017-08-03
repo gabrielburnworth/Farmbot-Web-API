@@ -4,7 +4,8 @@ import {
   ConfigurationName,
   Dictionary,
   SyncStatus,
-  FarmwareManifest
+  FarmwareManifest,
+  JobProgress
 } from "farmbot";
 import { AuthState } from "../auth/interfaces";
 import {
@@ -130,6 +131,7 @@ export interface FarmwareProps {
   currentImage: TaggedImage | undefined;
   syncStatus: SyncStatus;
   farmwares: Dictionary<FarmwareManifest | undefined>;
+  jobs: Dictionary<JobProgress | undefined>;
 }
 
 export interface HardwareSettingsProps {

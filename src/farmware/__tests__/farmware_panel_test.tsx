@@ -13,6 +13,7 @@ import * as React from "react";
 import { mount } from "enzyme";
 import { devices } from "../../device";
 import { FarmwarePanel } from "../farmware_panel";
+import { bot } from "../../__test_support__/fake_state/bot";
 
 describe("<FarmwarePanel/>", () => {
   beforeEach(() => {
@@ -24,7 +25,8 @@ describe("<FarmwarePanel/>", () => {
     return {
       component: mount(<FarmwarePanel
         syncStatus={"synced"}
-        farmwares={farmwares} />)
+        farmwares={farmwares}
+        jobs={bot.hardware.jobs} />)
     };
   }
 

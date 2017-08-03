@@ -97,6 +97,15 @@ export class FarmwarePanel extends React.Component<FWProps, Partial<FWState>> {
   }
 
   render() {
+    let job = this.props.jobs["farmware"] || { status: "", progress: "" };
+    let downloadProgress: string;
+    {
+      if (job.progress == 100 || job.progress == "") {
+        downloadProgress = "";
+      } else {
+        downloadProgress = job.progress + "%";
+      }
+    }
     return (
       <Widget className="farmware-widget">
         <WidgetHeader title="Farmware" helpText={ToolTips.FARMWARE} />
@@ -122,7 +131,7 @@ export class FarmwarePanel extends React.Component<FWProps, Partial<FWState>> {
                     className="fb-button green"
                     onClick={this.install}
                   >
-                    {t("Install")}
+                    {downloadProgress || t("Install")}
                   </button>
                 </Col>
               </fieldset>
