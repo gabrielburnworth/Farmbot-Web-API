@@ -14,6 +14,10 @@ import { panelState } from "../../../../__test_support__/control_panel_state";
 import { fakeState } from "../../../../__test_support__/fake_state";
 
 describe("<PowerAndReset/>", () => {
+  beforeEach(function () {
+    jest.clearAllMocks();
+  });
+
   const fakeProps = (): PowerAndResetProps => {
     return {
       controlPanelState: panelState(),
@@ -50,8 +54,9 @@ describe("<PowerAndReset/>", () => {
     p.controlPanelState.power_and_reset = true;
     const wrapper = mount(<PowerAndReset {...p} />);
     expect(wrapper.find("input").last().props().disabled).toBeTruthy();
-    expect(wrapper.find("label").last().props().style)
-      .toEqual({ color: "grey" });
+    const label = wrapper.find("label").at(4);
+    expect(label.text()).toEqual("Connection Attempt Period");
+    expect(label.props().style).toEqual({ color: "grey" });
   });
 
   it("toggles auto reset", () => {
@@ -62,5 +67,18 @@ describe("<PowerAndReset/>", () => {
     wrapper.find("button").at(3).simulate("click");
     expect(mockDevice.updateConfig)
       .toHaveBeenCalledWith({ disable_factory_reset: true });
+  });
+
+  it("resets FbosConfig", () => {
+    const p = fakeProps();
+    p.controlPanelState.power_and_reset = true;
+    const wrapper = mount(<PowerAndReset {...p} />);
+    const button = wrapper.find("button").at(4);
+    expect(button.text()).toEqual("RESET SETTINGS");
+    button.simulate("click");
+    expect(mockDevice.updateConfig).not.toHaveBeenCalled();
+    window.confirm = () => true;
+    button.simulate("click");
+    expect(mockDevice.updateConfig).toHaveBeenCalled();
   });
 });

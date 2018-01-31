@@ -374,6 +374,10 @@ export namespace Content {
     trim(`Warning! Opting in to FarmBot OS beta releases may reduce
     FarmBot system stability. Are you sure?`);
 
+  export const RESET_FBOS_CONFIG =
+    trim(`Restoring FarmBot OS setting defaults will destroy the
+    current settings, resetting them to default values.`);
+
   // Hardware Settings
   export const RESTORE_DEFAULT_HARDWARE_SETTINGS =
     trim(`Restoring hardware parameter defaults will destroy the
