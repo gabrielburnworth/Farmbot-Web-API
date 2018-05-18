@@ -24,7 +24,8 @@ describe("<TileExecuteScript/>", () => {
       farmwareInfo: {
         farmwareNames: ["one", "two", "three"],
         firstPartyFarmwareNames: ["one"],
-        showFirstPartyFarmware: false
+        showFirstPartyFarmware: false,
+        farmwareConfigs: {},
       }
     };
   };
