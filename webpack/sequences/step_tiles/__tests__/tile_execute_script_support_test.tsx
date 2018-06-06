@@ -25,10 +25,10 @@ describe("<FarmwareInputs />", () => {
 
   it("renders current step pairs", () => {
     const wrapper = mount(<FarmwareInputs {...fakeProps()} />);
-    expect(wrapper.find("label").first().text()).toEqual("Inputs");
+    expect(wrapper.find("label").first().text()).toEqual("Parameters");
     const inputs = wrapper.find("fieldset");
     expect(inputs.find("label").text()).toEqual("Input 1");
-    const inputFieldProps = inputs.find("input").props();
+    const inputFieldProps = inputs.find("input").at(1).props();
     expect(inputFieldProps.value).toEqual("1");
     expect(inputFieldProps.disabled).toEqual(false);
     const button = inputs.find("button");
@@ -40,10 +40,10 @@ describe("<FarmwareInputs />", () => {
     const p = fakeProps();
     p.farmwareInstalled = false;
     const wrapper = mount(<FarmwareInputs {...p} />);
-    expect(wrapper.find("label").first().text()).toEqual("Inputs");
+    expect(wrapper.find("label").first().text()).toEqual("Parameters");
     const inputs = wrapper.find("fieldset");
     expect(inputs.find("label").text()).toEqual("Input 1");
-    const inputFieldProps = inputs.find("input").props();
+    const inputFieldProps = inputs.find("input").at(1).props();
     expect(inputFieldProps.value).toEqual("1");
     expect(inputFieldProps.disabled).toEqual(false);
     const button = inputs.find("button");
@@ -55,11 +55,11 @@ describe("<FarmwareInputs />", () => {
     const p = fakeProps();
     p.defaultConfigs = [];
     const wrapper = mount(<FarmwareInputs {...p} />);
-    expect(wrapper.find("label").first().text()).toEqual("Inputs");
+    expect(wrapper.find("label").first().text()).toEqual("Parameters");
     const inputs = wrapper.find("fieldset");
     expect(inputs.props().title).toContain("not needed");
     expect(inputs.find("label").text()).toEqual("Input 1");
-    const inputFieldProps = inputs.find("input").props();
+    const inputFieldProps = inputs.find("input").at(1).props();
     expect(inputFieldProps.value).toEqual("1");
     expect(inputFieldProps.disabled).toEqual(true);
     const button = inputs.find("button");
@@ -71,10 +71,10 @@ describe("<FarmwareInputs />", () => {
     const p = fakeProps();
     p.currentStep.body = [];
     const wrapper = mount(<FarmwareInputs {...p} />);
-    expect(wrapper.find("label").first().text()).toEqual("Inputs");
+    expect(wrapper.find("label").first().text()).toEqual("Parameters");
     const inputs = wrapper.find("fieldset");
     expect(inputs.find("label").text()).toEqual("Input 1");
-    const inputFieldProps = inputs.find("input").props();
+    const inputFieldProps = inputs.find("input").at(1).props();
     expect(inputFieldProps.value).toEqual("1");
     expect(inputFieldProps.disabled).toEqual(false);
     const button = inputs.find("button");

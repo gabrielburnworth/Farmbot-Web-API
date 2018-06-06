@@ -40,6 +40,9 @@ export function TileExecuteScript({
     /** Change step Farmware name. */
     const updateStepFarmwareSelection = (item: DropDownItem) => {
       updateStep((step: ExecuteScript) => {
+        if (step.args.label !== "" + item.value) {
+          step.body = [];
+        }
         step.args.label = "" + item.value;
       });
     };
@@ -65,7 +68,7 @@ export function TileExecuteScript({
           <Col xs={12}>
             <label>{t("Package Name")}</label>
             <FBSelect
-              key={farmwareName}
+              key={farmwareName + selectedFarmwareDDI(farmwareName).value}
               list={farmwareList(farmwareInfo)}
               selectedItem={selectedFarmwareDDI(farmwareName)}
               onChange={updateStepFarmwareSelection}
