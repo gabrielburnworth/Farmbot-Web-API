@@ -1,7 +1,6 @@
 import * as React from "react";
 import { mount } from "enzyme";
 import { SequencesList } from "../sequences_list";
-import { auth } from "../../__test_support__/fake_state/token";
 import { fakeSequence } from "../../__test_support__/fake_state/resources";
 import { SequencesListProps } from "../interfaces";
 import { Actions } from "../../constants";
@@ -14,7 +13,6 @@ describe("<SequencesList />", () => {
     fakeSequence2.body.name = "Sequence 2";
     return {
       dispatch: jest.fn(),
-      auth,
       sequence: undefined,
       sequences: [fakeSequence1, fakeSequence2]
     };
