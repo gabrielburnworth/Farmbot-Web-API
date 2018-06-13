@@ -26,7 +26,8 @@ describe("<FarmwarePage />", () => {
       timeOffset: 0,
       syncStatus: "synced",
       webAppConfig: {},
-      firstPartyFarmwareNames: []
+      firstPartyFarmwareNames: [],
+      currentFarmware: undefined,
     };
     const wrapper = mount(<FarmwarePage {...props} />);
     ["Take Photo",

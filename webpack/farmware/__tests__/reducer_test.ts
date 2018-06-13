@@ -7,6 +7,7 @@ import { fakeImage } from "../../__test_support__/fake_state/resources";
 describe("famrwareReducer", () => {
   const fakeState = (): FarmwareState => {
     return {
+      currentFarmware: undefined,
       currentImage: undefined,
       firstPartyFarmwareNames: []
     };

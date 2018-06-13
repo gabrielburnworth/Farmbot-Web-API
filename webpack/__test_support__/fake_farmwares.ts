@@ -1,6 +1,6 @@
-import { Dictionary, FarmwareManifest } from "farmbot";
+import { Farmwares } from "../farmware/interfaces";
 
-export function fakeFarmwares(): Dictionary<FarmwareManifest | undefined> {
+export function fakeFarmwares(): Farmwares {
   return {
     "farmware_0": {
       name: "My Farmware",
