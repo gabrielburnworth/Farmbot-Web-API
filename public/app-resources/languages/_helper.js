@@ -39,15 +39,23 @@ var HelperNamespace = (function () {
     return strArray;
   }
 
-  // Locale-aware sort
+  /** Locale-aware sort */
   function localeSort(a, b) { return a.localeCompare(b); }
 
-  // '.t("")' or '{t("")' or ' t("")' or '(t("")' or
-  // '.t(``)' or '{t(``)' or ' t(``)' or '(t(``)'
-  var T_REGEX = /[.{(\s]t\(["`]([\w\s{}().,:'\-=\\?\/%!]*)["`].*\)/g;
+  // '.t("")' or '{t("")' or ' t("")' or '(t("")' or '[t("")'
+  // '.t(``)' or '{t(``)' or ' t(``)' or '(t(``)' or '[t(``)'
+  // Also finds ' t("some {{data}}", \n {data})'
+  var T_REGEX = /[.{[(\s]t\(["`]([\w\s{}().,:'\-=\\?\/%!]*)["`],*\s*.*\)/g;
 
   // '``'
   var C_REGEX = /[`]([\w\s{}().,:'\-=\\?"+!]*)[`].*/g;
+
+  /** Some additional phrases the regex can't find. */
+  const EXTRA_TAGS = [
+    "Fun", "Warn", "Controls", "Device", "Farm Designer", "on",
+    "Map Points", "Spread", "Row Spacing", "Height", "Taxon",
+    "Growing Degree Days", "Svg Icon", "Invalid date", "yes"
+  ];
 
   /**
    * Get all the tags in the files with extension .ts of the current project
@@ -67,9 +75,7 @@ var HelperNamespace = (function () {
     var flatAllTags = [].concat.apply([], allTags);
     var flatConstantsTags = [].concat.apply([], constantsTags);
     var flatDiagnosticTags = [].concat.apply([], diagnosticTags);
-    var flatExtraTags = [].concat.apply([],
-      ["Fun", "Warn", "Controls", "Device", "Farm Designer", "on",
-        "Map Points"]);
+    var flatExtraTags = [].concat.apply([], EXTRA_TAGS);
     var flattenedTags = [].concat.apply([],
       [flatAllTags, flatConstantsTags, flatDiagnosticTags, flatExtraTags]);
 
@@ -86,6 +92,35 @@ var HelperNamespace = (function () {
    */
   function logAllTags() {
     console.dir(getAllTags());
+  }
+
+  /**
+   * Label a section of tags with a comment before the first tag in the section.
+   */
+  function labelTags(string, tags, label) {
+    var firstUnusedKey = Object.keys(tags)[0];
+    var replacement = `\n  // ${label}\n  "${firstUnusedKey}"`;
+    var labeledString = string.replace(`"${firstUnusedKey}"`, replacement);
+    return labeledString;
+  }
+
+  /** Print some translation file status metrics. */
+  function generateSummary({
+    foundTags, unmatchedTags, allTags, countTranslated, countExisting, langCode
+  }) {
+    const current = Object.keys(foundTags).length;
+    const orphans = Object.keys(unmatchedTags).length;
+    const total = Object.keys(allTags).length;
+    const percent = Math.round(countTranslated / current * 100);
+    const existingUntranslated = countExisting - countTranslated;
+    console.log(`${current} strings found.`);
+    console.log(`  ${countExisting} existing items match.`);
+    console.log(`    ${countTranslated} existing translations match.`);
+    console.log(`    ${existingUntranslated} existing untranslated items.`);
+    console.log(`  ${current - countExisting} new items added.`);
+    console.log(`${percent}% of found strings translated.`);
+    console.log(`${orphans} unused, outdated, or extra items.`);
+    console.log(`Updated file (${langCode}.js) with ${total} items.`);
   }
 
   /**
@@ -127,7 +162,7 @@ var HelperNamespace = (function () {
           return;
         }
       }
-      catch (e) { // do this
+      catch (e) {
         console.log("we will create the file: " + langFilePath);
         // If there is no current file, we will create it
       };
@@ -183,26 +218,11 @@ var HelperNamespace = (function () {
       }
       for (var key in unexistingTag) result[key] = unexistingTag[key];
 
-      // File tag update summary
-      const current = Object.keys(jsonCurrentTagData).length;
-      const orphans = Object.keys(unexistingTag).length;
-      const total = Object.keys(result).length;
-      const percent = Math.round(translated / current * 100);
-      console.log(`${current} strings found.`);
-      console.log(`  ${existing} existing items match.`);
-      console.log(`    ${translated} existing translations match.`);
-      console.log(`    ${existing - translated} existing untranslated items.`);
-      console.log(`  ${current - existing} new items added.`);
-      console.log(`${percent}% of found strings translated.`);
-      console.log(`${orphans} unused, outdated, or extra items.`);
-      console.log(`Updated file (${lang}.js) with ${total} items.`);
-
-      function labelTags(string, tags, label) {
-        var firstUnusedKey = Object.keys(tags)[0];
-        var replacement = `\n  // ${label}\n  "` + firstUnusedKey;
-        var labeledString = string.replace(`"` + firstUnusedKey, replacement);
-        return labeledString;
-      }
+      generateSummary({
+        langCode: lang, allTags: result,
+        foundTags: jsonCurrentTagData, unmatchedTags: unexistingTag,
+        countTranslated: translated, countExisting: existing
+      });
 
       var stringJson = JSON.stringify(result, null, 2);
       var label = "Unmatched (English phrase outdated or manually added)";

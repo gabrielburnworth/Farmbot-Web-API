@@ -8,6 +8,7 @@ import { prettyPrintApiErrors } from "../util";
 import { API } from "../api";
 import "../css/_index.scss";
 import { Row, Col, Widget, WidgetHeader, WidgetBody } from "../ui/index";
+import { Content } from "../constants";
 
 interface Props { }
 interface State {
@@ -99,8 +100,7 @@ export class TosUpdate extends React.Component<Props, Partial<State>> {
 
   componentDidMount() {
     logInit();
-    const body = t("Before logging in, you must agree to our latest Terms" +
-      " of Service and Privacy Policy");
+    const body = t(Content.NEW_TOS);
     log(body, t("New Terms of Service"));
   }
 
