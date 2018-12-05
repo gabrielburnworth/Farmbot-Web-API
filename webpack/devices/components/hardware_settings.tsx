@@ -73,6 +73,7 @@ export class HardwareSettings extends
             bot={bot}
             sourceFwConfig={sourceFwConfig}
             firmwareConfig={firmwareConfig}
+            shouldDisplay={this.props.shouldDisplay}
             botDisconnected={botDisconnected} />
           <Motors
             dispatch={dispatch}
@@ -80,6 +81,7 @@ export class HardwareSettings extends
             controlPanelState={controlPanelState}
             sourceFbosConfig={sourceFbosConfig}
             sourceFwConfig={sourceFwConfig}
+            shouldDisplay={this.props.shouldDisplay}
             isValidFwConfig={!!firmwareConfig} />
           <EncodersAndEndStops
             dispatch={dispatch}
@@ -89,6 +91,7 @@ export class HardwareSettings extends
           <PinGuard
             dispatch={dispatch}
             controlPanelState={controlPanelState}
+            shouldDisplay={this.props.shouldDisplay}
             sourceFwConfig={sourceFwConfig} />
           <DangerZone
             dispatch={dispatch}

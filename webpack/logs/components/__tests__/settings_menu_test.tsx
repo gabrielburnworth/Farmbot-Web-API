@@ -25,6 +25,7 @@ describe("<LogsSettingsMenu />", () => {
         return { value: bot.hardware.configuration[x], consistent: true };
       },
       getConfigValue: x => mockStorj[x],
+      shouldDisplay: jest.fn(),
     };
   };
 

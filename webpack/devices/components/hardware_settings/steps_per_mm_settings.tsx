@@ -9,7 +9,7 @@ import { SpacePanelToolTip } from "../space_panel_tool_tip";
 import { t } from "i18next";
 
 export function LegacyStepsPerMm(props: MotorsProps) {
-  const { dispatch, sourceFbosConfig } = props;
+  const { dispatch, sourceFbosConfig, shouldDisplay } = props;
 
   return <Row>
     <Col xs={6}>
@@ -22,18 +22,21 @@ export function LegacyStepsPerMm(props: MotorsProps) {
       <BotConfigInputBox
         setting="steps_per_mm_x"
         sourceFbosConfig={sourceFbosConfig}
+        shouldDisplay={shouldDisplay}
         dispatch={dispatch} />
     </Col>
     <Col xs={2}>
       <BotConfigInputBox
         setting="steps_per_mm_y"
         sourceFbosConfig={sourceFbosConfig}
+        shouldDisplay={shouldDisplay}
         dispatch={dispatch} />
     </Col>
     <Col xs={2}>
       <BotConfigInputBox
         setting="steps_per_mm_z"
         sourceFbosConfig={sourceFbosConfig}
+        shouldDisplay={shouldDisplay}
         dispatch={dispatch} />
     </Col>
   </Row>;
@@ -51,6 +54,7 @@ export function StepsPerMmSettings(props: MotorsProps) {
       z={"movement_step_per_mm_z"}
       float={false}
       sourceFwConfig={sourceFwConfig}
+      shouldDisplay={props.shouldDisplay}
       dispatch={dispatch} />;
   } else {
     return <LegacyStepsPerMm {...props} />;

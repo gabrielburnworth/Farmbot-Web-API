@@ -15,7 +15,8 @@ describe("McuInputBox", () => {
         return { value: bot.hardware.mcu_params[x], consistent: true };
       },
       setting: "encoder_enabled_x",
-      dispatch: jest.fn()
+      dispatch: jest.fn(),
+      shouldDisplay: jest.fn(),
     };
   };
 
@@ -41,7 +42,8 @@ describe("McuInputBox", () => {
     const wrapper = shallow(<McuInputBox {...p} />);
     wrapper.find("BlurableInput").simulate("commit",
       { currentTarget: { value: "5.5" } });
-    expect(updateMCU).toHaveBeenCalledWith("encoder_enabled_x", "5.5");
+    expect(updateMCU).toHaveBeenCalledWith("encoder_enabled_x", "5.5",
+      expect.any(Function));
   });
 
   it("handles int", () => {
@@ -50,6 +52,7 @@ describe("McuInputBox", () => {
     const wrapper = shallow(<McuInputBox {...p} />);
     wrapper.find("BlurableInput").simulate("commit",
       { currentTarget: { value: "5.5" } });
-    expect(updateMCU).toHaveBeenCalledWith("encoder_enabled_x", "5");
+    expect(updateMCU).toHaveBeenCalledWith("encoder_enabled_x", "5",
+      expect.any(Function));
   });
 });

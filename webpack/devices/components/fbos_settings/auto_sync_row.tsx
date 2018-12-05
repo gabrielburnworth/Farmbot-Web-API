@@ -25,7 +25,8 @@ export function AutoSyncRow(props: AutoSyncRowProps) {
         toggleValue={autoSync.value}
         dim={!autoSync.consistent}
         toggleAction={() => {
-          props.dispatch(updateConfig({ auto_sync: !autoSync.value }));
+          props.dispatch(updateConfig({ auto_sync: !autoSync.value },
+            props.shouldDisplay));
         }} />
     </Col>
   </Row>;

@@ -93,6 +93,7 @@ export class Logs extends React.Component<LogsProps, Partial<LogsState>> {
               <LogsSettingsMenu
                 setFilterLevel={this.setFilterLevel}
                 dispatch={this.props.dispatch}
+                shouldDisplay={this.props.shouldDisplay}
                 sourceFbosConfig={this.props.sourceFbosConfig}
                 getConfigValue={this.props.getConfigValue} />
             </Popover>

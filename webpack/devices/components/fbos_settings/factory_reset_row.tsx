@@ -52,7 +52,7 @@ export function FactoryResetRow(props: FactoryResetRowProps) {
           toggleAction={() => {
             dispatch(updateConfig({
               disable_factory_reset: !disableFactoryReset.value
-            }));
+            }, props.shouldDisplay));
           }} />
       </Col>
     </Row>
@@ -71,6 +71,7 @@ export function FactoryResetRow(props: FactoryResetRowProps) {
         <BotConfigInputBox
           setting="network_not_found_timer"
           dispatch={dispatch}
+          shouldDisplay={props.shouldDisplay}
           disabled={!!disableFactoryReset.value}
           sourceFbosConfig={sourceFbosConfig} />
       </Col>

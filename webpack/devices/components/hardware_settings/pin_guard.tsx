@@ -11,7 +11,7 @@ import { ToolTips } from "../../../constants";
 export function PinGuard(props: PinGuardProps) {
 
   const { pin_guard } = props.controlPanelState;
-  const { dispatch, sourceFwConfig } = props;
+  const { dispatch, sourceFwConfig, shouldDisplay } = props;
 
   return <section>
     <Header
@@ -44,6 +44,7 @@ export function PinGuard(props: PinGuardProps) {
         timeout={"pin_guard_1_time_out"}
         activeState={"pin_guard_1_active_state"}
         dispatch={dispatch}
+        shouldDisplay={shouldDisplay}
         sourceFwConfig={sourceFwConfig} />
       <PinGuardMCUInputGroup
         name={t("Pin Guard {{ num }}", { num: 2 })}
@@ -51,6 +52,7 @@ export function PinGuard(props: PinGuardProps) {
         timeout={"pin_guard_2_time_out"}
         activeState={"pin_guard_2_active_state"}
         dispatch={dispatch}
+        shouldDisplay={shouldDisplay}
         sourceFwConfig={sourceFwConfig} />
       <PinGuardMCUInputGroup
         name={t("Pin Guard {{ num }}", { num: 3 })}
@@ -58,6 +60,7 @@ export function PinGuard(props: PinGuardProps) {
         timeout={"pin_guard_3_time_out"}
         activeState={"pin_guard_3_active_state"}
         dispatch={dispatch}
+        shouldDisplay={shouldDisplay}
         sourceFwConfig={sourceFwConfig} />
       <PinGuardMCUInputGroup
         name={t("Pin Guard {{ num }}", { num: 4 })}
@@ -65,6 +68,7 @@ export function PinGuard(props: PinGuardProps) {
         timeout={"pin_guard_4_time_out"}
         activeState={"pin_guard_4_active_state"}
         dispatch={dispatch}
+        shouldDisplay={shouldDisplay}
         sourceFwConfig={sourceFwConfig} />
       <PinGuardMCUInputGroup
         name={t("Pin Guard {{ num }}", { num: 5 })}
@@ -72,6 +76,7 @@ export function PinGuard(props: PinGuardProps) {
         timeout={"pin_guard_5_time_out"}
         activeState={"pin_guard_5_active_state"}
         dispatch={dispatch}
+        shouldDisplay={shouldDisplay}
         sourceFwConfig={sourceFwConfig} />
     </Collapse>
   </section>;

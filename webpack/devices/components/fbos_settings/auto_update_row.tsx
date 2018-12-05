@@ -25,7 +25,8 @@ export function AutoUpdateRow(props: AutoUpdateRowProps) {
         dim={!osAutoUpdate.consistent}
         toggleAction={() => {
           const newOsAutoUpdateNum = !osAutoUpdate.value ? 1 : 0;
-          props.dispatch(updateConfig({ os_auto_update: newOsAutoUpdateNum }));
+          props.dispatch(updateConfig({ os_auto_update: newOsAutoUpdateNum },
+            props.shouldDisplay));
         }} />
     </Col>
   </Row>;

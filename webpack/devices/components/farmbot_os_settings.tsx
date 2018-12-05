@@ -150,11 +150,13 @@ export class FarmbotOsSettings
               botOnline={botOnline} />
             <AutoUpdateRow
               dispatch={this.props.dispatch}
+              shouldDisplay={this.props.shouldDisplay}
               sourceFbosConfig={sourceFbosConfig} />
             {(location.host.includes("localhost")
               || !isUndefined(sourceFbosConfig("auto_sync").value)) &&
               <AutoSyncRow
                 dispatch={this.props.dispatch}
+                shouldDisplay={this.props.shouldDisplay}
                 sourceFbosConfig={sourceFbosConfig} />}
             <CameraSelection
               env={this.props.env}

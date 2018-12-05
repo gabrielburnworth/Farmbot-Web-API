@@ -21,6 +21,7 @@ export interface HomingAndCalibrationProps {
   sourceFwConfig: SourceFwConfig;
   firmwareConfig: FirmwareConfig | undefined;
   botDisconnected: boolean;
+  shouldDisplay: ShouldDisplay;
 }
 
 export interface BooleanMCUInputGroupProps {
@@ -35,6 +36,7 @@ export interface BooleanMCUInputGroupProps {
   grayscale?: Record<Xyz, boolean>;
   caution?: boolean | undefined;
   displayAlert?: string | undefined;
+  shouldDisplay: ShouldDisplay;
 }
 
 export interface CalibrationRowProps {
@@ -53,6 +55,7 @@ export interface NumericMCUInputGroupProps {
   float?: boolean;
   intSize?: IntegerSize;
   gray?: Record<Xyz, boolean>;
+  shouldDisplay: ShouldDisplay;
 }
 
 export interface PinGuardMCUInputGroupProps {
@@ -62,12 +65,14 @@ export interface PinGuardMCUInputGroupProps {
   pinNumber: McuParamName;
   timeout: McuParamName;
   activeState: McuParamName;
+  shouldDisplay: ShouldDisplay;
 }
 
 export interface PinGuardProps {
   dispatch: Function;
   controlPanelState: ControlPanelState;
   sourceFwConfig: SourceFwConfig;
+  shouldDisplay: ShouldDisplay;
 }
 
 export interface MotorsProps {
@@ -77,6 +82,7 @@ export interface MotorsProps {
   sourceFbosConfig: SourceFbosConfig;
   sourceFwConfig: SourceFwConfig;
   isValidFwConfig: boolean;
+  shouldDisplay: ShouldDisplay;
 }
 
 export interface EncodersProps {

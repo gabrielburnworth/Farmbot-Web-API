@@ -19,6 +19,7 @@ export function BooleanMCUInputGroup(props: BooleanMCUInputGroupProps) {
     displayAlert,
     sourceFwConfig,
     dispatch,
+    shouldDisplay,
   } = props;
 
   const xParam = sourceFwConfig(x);
@@ -41,7 +42,9 @@ export function BooleanMCUInputGroup(props: BooleanMCUInputGroupProps) {
         dim={!xParam.consistent}
         toggleValue={xParam.value}
         toggleAction={() =>
-          dispatch(settingToggle(x, sourceFwConfig, displayAlert))} />
+          dispatch(settingToggle({
+            name: x, sourceFwConfig, displayAlert, shouldDisplay
+          }))} />
     </Col>
     <Col xs={2} className={"centered-button-div"}>
       <ToggleButton
@@ -50,7 +53,9 @@ export function BooleanMCUInputGroup(props: BooleanMCUInputGroupProps) {
         dim={!yParam.consistent}
         toggleValue={yParam.value}
         toggleAction={() =>
-          dispatch(settingToggle(y, sourceFwConfig, displayAlert))} />
+          dispatch(settingToggle({
+            name: y, sourceFwConfig, displayAlert, shouldDisplay
+          }))} />
     </Col>
     <Col xs={2} className={"centered-button-div"}>
       <ToggleButton
@@ -59,7 +64,9 @@ export function BooleanMCUInputGroup(props: BooleanMCUInputGroupProps) {
         dim={!zParam.consistent}
         toggleValue={zParam.value}
         toggleAction={() =>
-          dispatch(settingToggle(z, sourceFwConfig, displayAlert))} />
+          dispatch(settingToggle({
+            name: z, sourceFwConfig, displayAlert, shouldDisplay
+          }))} />
     </Col>
   </Row>;
 }

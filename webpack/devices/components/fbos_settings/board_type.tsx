@@ -95,7 +95,8 @@ export class BoardType extends React.Component<BoardTypeProps, BoardTypeState> {
     const firmware_hardware = selectedItem.value;
     if (selectedItem && isFwHardwareValue(firmware_hardware)) {
       info(t("Sending firmware configuration..."), t("Sending"));
-      this.props.dispatch(updateConfig({ firmware_hardware }));
+      this.props.dispatch(updateConfig({ firmware_hardware },
+        this.props.shouldDisplay));
       this.setState({ sending: true });
       this.forceUpdate();
     }

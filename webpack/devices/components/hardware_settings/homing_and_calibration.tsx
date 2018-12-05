@@ -14,8 +14,8 @@ import { minFwVersionCheck } from "../../../util";
 
 export function HomingAndCalibration(props: HomingAndCalibrationProps) {
 
-  const { dispatch, bot, sourceFwConfig, firmwareConfig, botDisconnected
-  } = props;
+  const { dispatch, bot, sourceFwConfig, firmwareConfig, botDisconnected,
+    shouldDisplay } = props;
   const hardware = firmwareConfig ? firmwareConfig : bot.hardware.mcu_params;
   const { firmware_version } = bot.hardware.informational_settings;
   const { homing_and_calibration } = props.bot.controlPanelState;
@@ -50,6 +50,7 @@ export function HomingAndCalibration(props: HomingAndCalibrationProps) {
         z={"movement_home_at_boot_z"}
         dispatch={dispatch}
         sourceFwConfig={sourceFwConfig}
+        shouldDisplay={shouldDisplay}
         caution={true} />
       <BooleanMCUInputGroup
         name={t("Stop at Home")}
@@ -58,6 +59,7 @@ export function HomingAndCalibration(props: HomingAndCalibrationProps) {
         y={"movement_stop_at_home_y"}
         z={"movement_stop_at_home_z"}
         dispatch={dispatch}
+        shouldDisplay={shouldDisplay}
         sourceFwConfig={sourceFwConfig} />
       <BooleanMCUInputGroup
         name={t("Stop at Max")}
@@ -66,6 +68,7 @@ export function HomingAndCalibration(props: HomingAndCalibrationProps) {
         y={"movement_stop_at_max_y"}
         z={"movement_stop_at_max_z"}
         dispatch={dispatch}
+        shouldDisplay={shouldDisplay}
         sourceFwConfig={sourceFwConfig} />
       <BooleanMCUInputGroup
         name={t("Negative Coordinates Only")}
@@ -74,6 +77,7 @@ export function HomingAndCalibration(props: HomingAndCalibrationProps) {
         y={"movement_home_up_y"}
         z={"movement_home_up_z"}
         dispatch={dispatch}
+        shouldDisplay={shouldDisplay}
         sourceFwConfig={sourceFwConfig} />
       <NumericMCUInputGroup
         name={t("Axis Length (steps)")}
@@ -87,6 +91,7 @@ export function HomingAndCalibration(props: HomingAndCalibrationProps) {
           z: !sourceFwConfig("movement_stop_at_max_z").value,
         }}
         sourceFwConfig={sourceFwConfig}
+        shouldDisplay={shouldDisplay}
         dispatch={dispatch}
         intSize={axisLengthIntSize} />
       <NumericMCUInputGroup
@@ -96,6 +101,7 @@ export function HomingAndCalibration(props: HomingAndCalibrationProps) {
         y={"movement_timeout_y"}
         z={"movement_timeout_z"}
         sourceFwConfig={sourceFwConfig}
+        shouldDisplay={shouldDisplay}
         dispatch={dispatch} />
     </Collapse>
   </section>;

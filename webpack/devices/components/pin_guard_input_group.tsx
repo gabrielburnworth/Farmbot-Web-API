@@ -9,7 +9,9 @@ import { isUndefined } from "lodash";
 
 export function PinGuardMCUInputGroup(props: PinGuardMCUInputGroupProps) {
 
-  const { sourceFwConfig, dispatch, name, pinNumber, timeout, activeState
+  const {
+    sourceFwConfig, dispatch, name, pinNumber, timeout, activeState,
+    shouldDisplay
   } = props;
   const activeStateValue = sourceFwConfig(activeState).value;
   const inactiveState = isUndefined(activeStateValue)
@@ -26,6 +28,7 @@ export function PinGuardMCUInputGroup(props: PinGuardMCUInputGroupProps) {
         setting={pinNumber}
         sourceFwConfig={sourceFwConfig}
         dispatch={dispatch}
+        shouldDisplay={shouldDisplay}
         filter={32000} />
     </Col>
     <Col xs={4}>
@@ -33,6 +36,7 @@ export function PinGuardMCUInputGroup(props: PinGuardMCUInputGroupProps) {
         setting={timeout}
         sourceFwConfig={sourceFwConfig}
         dispatch={dispatch}
+        shouldDisplay={shouldDisplay}
         filter={32000} />
     </Col>
     <Col xs={2} className={"centered-button-div"}>
@@ -40,7 +44,9 @@ export function PinGuardMCUInputGroup(props: PinGuardMCUInputGroupProps) {
         customText={{ textFalse: t("low"), textTrue: t("high") }}
         toggleValue={inactiveState}
         dim={!sourceFwConfig(activeState).consistent}
-        toggleAction={() => dispatch(settingToggle(activeState, sourceFwConfig))} />
+        toggleAction={() => dispatch(settingToggle({
+          name: activeState, sourceFwConfig, shouldDisplay
+        }))} />
     </Col>
   </Row>;
 }

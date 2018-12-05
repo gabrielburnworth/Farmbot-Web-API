@@ -31,6 +31,7 @@ describe("<Motors/>", () => {
         return { value: bot.hardware.mcu_params[x], consistent: true };
       },
       isValidFwConfig: true,
+      shouldDisplay: jest.fn(),
     };
   };
 
@@ -93,6 +94,7 @@ describe("<StepsPerMmSettings/>", () => {
       sourceFbosConfig: jest.fn(),
       sourceFwConfig: jest.fn(),
       isValidFwConfig: true,
+      shouldDisplay: jest.fn(),
     };
   };
 

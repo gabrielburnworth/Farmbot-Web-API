@@ -183,8 +183,9 @@ describe("settingToggle()", () => {
     const fakeConfig = fakeFirmwareConfig();
     fakeConfig.body.api_migrated = false;
     state.resources = buildResourceIndex([fakeConfig]);
-    await actions.settingToggle(
-      "param_mov_nr_retry", sourceSetting)(jest.fn(), () => state);
+    await actions.settingToggle({
+      name: "param_mov_nr_retry", sourceFwConfig: sourceSetting
+    })(jest.fn(), () => state);
     expect(mockDevice.updateMcu)
       .toHaveBeenCalledWith({ param_mov_nr_retry: 1 });
   });
@@ -198,8 +199,9 @@ describe("settingToggle()", () => {
     fakeConfig.body.api_migrated = true;
     state.resources = buildResourceIndex([fakeConfig]);
     const dispatch = jest.fn();
-    await actions.settingToggle(
-      "param_mov_nr_retry", sourceSetting)(dispatch, () => state);
+    await actions.settingToggle({
+      name: "param_mov_nr_retry", sourceFwConfig: sourceSetting
+    })(dispatch, () => state);
     expect(mockDevice.updateMcu).not.toHaveBeenCalled();
     expect(dispatch).toHaveBeenCalledWith({
       payload: {
@@ -216,9 +218,10 @@ describe("settingToggle()", () => {
     fakeConfig.body.api_migrated = false;
     window.alert = jest.fn();
     const msg = "this is an alert.";
-    actions.settingToggle(
-      "param_mov_nr_retry", jest.fn(() => ({ value: "" })),
-      msg)(jest.fn(), fakeState);
+    actions.settingToggle({
+      name: "param_mov_nr_retry", sourceFwConfig: jest.fn(() => ({ value: "" })),
+      displayAlert: msg
+    })(jest.fn(), fakeState);
     expect(window.alert).toHaveBeenCalledWith(msg);
   });
 });
@@ -231,7 +234,7 @@ describe("updateMCU()", () => {
     fakeConfig.body.api_migrated = false;
     state.resources = buildResourceIndex([fakeConfig]);
     await actions.updateMCU(
-      "param_mov_nr_retry", "1")(jest.fn(), () => state);
+      "param_mov_nr_retry", "1", jest.fn())(jest.fn(), () => state);
     expect(mockDevice.updateMcu)
       .toHaveBeenCalledWith({ param_mov_nr_retry: "1" });
   });
@@ -244,7 +247,7 @@ describe("updateMCU()", () => {
     state.resources = buildResourceIndex([fakeConfig]);
     const dispatch = jest.fn();
     await actions.updateMCU(
-      "param_mov_nr_retry", "0")(dispatch, () => state);
+      "param_mov_nr_retry", "0", jest.fn())(dispatch, () => state);
     expect(mockDevice.updateMcu).not.toHaveBeenCalled();
     expect(dispatch).toHaveBeenCalledWith({
       payload: {
@@ -263,7 +266,7 @@ describe("updateMCU()", () => {
     fakeConfig.body.api_migrated = false;
     state.resources = buildResourceIndex([fakeConfig]);
     await actions.updateMCU(
-      "movement_min_spd_x", "100")(jest.fn(), () => state);
+      "movement_min_spd_x", "100", jest.fn())(jest.fn(), () => state);
     expect(mockDevice.updateMcu).not.toHaveBeenCalled();
     expect(warning).toHaveBeenCalledWith(
       "Minimum speed should always be lower than maximum");
@@ -277,7 +280,7 @@ describe("updateMCU()", () => {
     fakeConfig.body.api_migrated = false;
     state.resources = buildResourceIndex([fakeConfig]);
     await actions.updateMCU(
-      "param_mov_nr_retry", "1")(dispatch, () => state);
+      "param_mov_nr_retry", "1", jest.fn())(dispatch, () => state);
     await expect(mockDevice.updateMcu).toHaveBeenCalled();
     expect(dispatch).toHaveBeenLastCalledWith({
       payload: undefined, type: Actions.SETTING_UPDATE_END
@@ -478,7 +481,7 @@ describe("updateConfig()", () => {
     const dispatch = jest.fn();
     const state = fakeState();
     state.resources.index = buildResourceIndex([fakeFbosConfig()]).index;
-    actions.updateConfig({ auto_sync: true })(dispatch, () => state);
+    actions.updateConfig({ auto_sync: true }, jest.fn())(dispatch, () => state);
     expect(mockDevice.updateConfig).toHaveBeenCalledWith({ auto_sync: true });
     expect(dispatch).not.toHaveBeenCalled();
   });
@@ -489,7 +492,7 @@ describe("updateConfig()", () => {
     const fakeFBOSConfig = fakeFbosConfig();
     fakeFBOSConfig.body.api_migrated = true;
     state.resources.index = buildResourceIndex([fakeFBOSConfig]).index;
-    actions.updateConfig({ auto_sync: true })(dispatch, () => state);
+    actions.updateConfig({ auto_sync: true }, jest.fn())(dispatch, () => state);
     expect(mockDevice.updateConfig).not.toHaveBeenCalled();
     expect(dispatch).toHaveBeenCalledWith({
       payload: {

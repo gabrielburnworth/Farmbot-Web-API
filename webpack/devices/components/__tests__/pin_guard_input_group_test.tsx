@@ -20,6 +20,7 @@ describe("<PinGuardMCUInputGroup/>", () => {
       sourceFwConfig: (x) => {
         return { value: bot.hardware.mcu_params[x], consistent: true };
       },
+      shouldDisplay: jest.fn(),
     };
   };
 
@@ -27,7 +28,10 @@ describe("<PinGuardMCUInputGroup/>", () => {
     const p = fakeProps();
     const wrapper = mount(<PinGuardMCUInputGroup {...p} />);
     wrapper.find("button").simulate("click");
-    expect(settingToggle).toHaveBeenCalledWith("pin_guard_1_active_state",
-      expect.any(Function));
+    expect(settingToggle).toHaveBeenCalledWith({
+      name: "pin_guard_1_active_state",
+      sourceFwConfig: expect.any(Function),
+      shouldDisplay: expect.any(Function)
+    });
   });
 });

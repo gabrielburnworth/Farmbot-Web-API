@@ -25,6 +25,7 @@ describe("<HomingAndCalibration />", () => {
       sourceFwConfig={(x) => {
         return { value: bot.hardware.mcu_params[x], consistent: true };
       }}
+      shouldDisplay={jest.fn()}
       botDisconnected={false} />);
     const e = { currentTarget: { value: provided } } as
       React.SyntheticEvent<HTMLInputElement>;
@@ -32,7 +33,8 @@ describe("<HomingAndCalibration />", () => {
     input.onChange && input.onChange(e);
     input.onSubmit && input.onSubmit(e);
     expect(updateMCU)
-      .toHaveBeenCalledWith("movement_axis_nr_steps_x", expected);
+      .toHaveBeenCalledWith("movement_axis_nr_steps_x", expected,
+        expect.any(Function));
   }
   it("short int", () => {
     testAxisLengthInput("5.0.0", "100000", "32000");

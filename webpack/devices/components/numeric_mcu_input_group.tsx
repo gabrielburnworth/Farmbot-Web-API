@@ -7,7 +7,8 @@ import { Row, Col } from "../../ui/index";
 export function NumericMCUInputGroup(props: NumericMCUInputGroupProps) {
 
   const {
-    sourceFwConfig, dispatch, tooltip, name, x, y, z, intSize, gray, float
+    sourceFwConfig, dispatch, tooltip, name, x, y, z, intSize, gray, float,
+    shouldDisplay
   } = props;
   return <Row>
     <Col xs={6}>
@@ -23,6 +24,7 @@ export function NumericMCUInputGroup(props: NumericMCUInputGroupProps) {
         dispatch={dispatch}
         intSize={intSize}
         float={float}
+        shouldDisplay={shouldDisplay}
         gray={gray && gray.x} />
     </Col>
     <Col xs={2}>
@@ -32,6 +34,7 @@ export function NumericMCUInputGroup(props: NumericMCUInputGroupProps) {
         dispatch={dispatch}
         intSize={intSize}
         float={float}
+        shouldDisplay={shouldDisplay}
         gray={gray && gray.y} />
     </Col>
     <Col xs={2}>
@@ -41,6 +44,7 @@ export function NumericMCUInputGroup(props: NumericMCUInputGroupProps) {
         dispatch={dispatch}
         intSize={intSize}
         float={float}
+        shouldDisplay={shouldDisplay}
         gray={gray && gray.z} />
     </Col>
   </Row>;

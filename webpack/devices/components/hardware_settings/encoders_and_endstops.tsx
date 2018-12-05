@@ -33,6 +33,7 @@ export function EncodersAndEndStops(props: EncodersProps) {
         y={"encoder_enabled_y"}
         z={"encoder_enabled_z"}
         dispatch={dispatch}
+        shouldDisplay={shouldDisplay}
         sourceFwConfig={sourceFwConfig} />
       <BooleanMCUInputGroup
         name={t("Use Encoders for Positioning")}
@@ -42,6 +43,7 @@ export function EncodersAndEndStops(props: EncodersProps) {
         z={"encoder_use_for_pos_z"}
         grayscale={encodersDisabled}
         dispatch={dispatch}
+        shouldDisplay={shouldDisplay}
         sourceFwConfig={sourceFwConfig} />
       <BooleanMCUInputGroup
         name={t("Invert Encoders")}
@@ -51,6 +53,7 @@ export function EncodersAndEndStops(props: EncodersProps) {
         z={"encoder_invert_z"}
         grayscale={encodersDisabled}
         dispatch={dispatch}
+        shouldDisplay={shouldDisplay}
         sourceFwConfig={sourceFwConfig} />
       <NumericMCUInputGroup
         name={t("Max Missed Steps")}
@@ -60,6 +63,7 @@ export function EncodersAndEndStops(props: EncodersProps) {
         z={"encoder_missed_steps_max_z"}
         gray={encodersDisabled}
         sourceFwConfig={sourceFwConfig}
+        shouldDisplay={shouldDisplay}
         dispatch={dispatch} />
       <NumericMCUInputGroup
         name={t("Encoder Missed Step Decay")}
@@ -69,6 +73,7 @@ export function EncodersAndEndStops(props: EncodersProps) {
         z={"encoder_missed_steps_decay_z"}
         gray={encodersDisabled}
         sourceFwConfig={sourceFwConfig}
+        shouldDisplay={shouldDisplay}
         dispatch={dispatch} />
       <NumericMCUInputGroup
         name={t("Encoder Scaling")}
@@ -78,6 +83,7 @@ export function EncodersAndEndStops(props: EncodersProps) {
         z={"encoder_scaling_z"}
         gray={encodersDisabled}
         sourceFwConfig={sourceFwConfig}
+        shouldDisplay={shouldDisplay}
         dispatch={dispatch} />
       <BooleanMCUInputGroup
         name={t("Enable Endstops")}
@@ -86,6 +92,7 @@ export function EncodersAndEndStops(props: EncodersProps) {
         y={"movement_enable_endpoints_y"}
         z={"movement_enable_endpoints_z"}
         dispatch={dispatch}
+        shouldDisplay={shouldDisplay}
         sourceFwConfig={sourceFwConfig} />
       <BooleanMCUInputGroup
         name={t("Swap Endstops")}
@@ -99,6 +106,7 @@ export function EncodersAndEndStops(props: EncodersProps) {
           z: !sourceFwConfig("movement_enable_endpoints_z").value
         }}
         dispatch={dispatch}
+        shouldDisplay={shouldDisplay}
         sourceFwConfig={sourceFwConfig} />
       {shouldDisplay(Feature.endstop_invert) &&
         <BooleanMCUInputGroup
@@ -113,6 +121,7 @@ export function EncodersAndEndStops(props: EncodersProps) {
             z: !sourceFwConfig("movement_enable_endpoints_z").value
           }}
           dispatch={dispatch}
+          shouldDisplay={shouldDisplay}
           sourceFwConfig={sourceFwConfig} />}
     </Collapse>
   </section>;

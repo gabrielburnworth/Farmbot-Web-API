@@ -47,6 +47,7 @@ export function PowerAndReset(props: PowerAndResetProps) {
       <FactoryResetRow
         dispatch={dispatch}
         sourceFbosConfig={sourceFbosConfig}
+        shouldDisplay={shouldDisplay}
         botOnline={botOnline} />
       {shouldDisplay(Feature.change_ownership) && botOnline &&
         <Popover position={Position.BOTTOM_LEFT}>

@@ -7,11 +7,13 @@ import { InformationalSettings } from "farmbot";
 export interface AutoSyncRowProps {
   dispatch: Function;
   sourceFbosConfig: SourceFbosConfig;
+  shouldDisplay: ShouldDisplay;
 }
 
 export interface AutoUpdateRowProps {
   dispatch: Function;
   sourceFbosConfig: SourceFbosConfig;
+  shouldDisplay: ShouldDisplay;
 }
 
 export interface CameraSelectionProps {
@@ -45,6 +47,7 @@ export interface FactoryResetRowProps {
   dispatch: Function;
   sourceFbosConfig: SourceFbosConfig;
   botOnline: boolean;
+  shouldDisplay: ShouldDisplay;
 }
 
 export interface FarmbotOsRowProps {

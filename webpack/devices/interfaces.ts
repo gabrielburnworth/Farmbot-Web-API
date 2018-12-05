@@ -77,6 +77,8 @@ export enum Feature {
   api_farmware_installations = "api_farmware_installations",
   api_farmware_env = "api_farmware_env",
   use_update_channel = "use_update_channel",
+  api_fbos_config = "api_fbos_config",
+  api_fw_config = "api_fw_config",
 }
 /** Object fetched from FEATURE_MIN_VERSIONS_URL. */
 export type MinOsFeatureLookup = Partial<Record<Feature, string>>;
@@ -188,6 +190,7 @@ export interface McuInputBoxProps {
   float?: boolean;
   filter?: number;
   gray?: boolean;
+  shouldDisplay: ShouldDisplay;
 }
 
 export interface EStopButtonProps {

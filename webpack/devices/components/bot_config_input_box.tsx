@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as _ from "lodash";
 import { BlurableInput } from "../../ui/index";
-import { SourceFbosConfig } from "../interfaces";
+import { SourceFbosConfig, ShouldDisplay } from "../interfaces";
 import { ConfigurationName } from "farmbot/dist";
 import { updateConfig } from "../actions";
 
@@ -10,6 +10,7 @@ export interface BotConfigInputBoxProps {
   dispatch: Function;
   disabled?: boolean;
   sourceFbosConfig: SourceFbosConfig;
+  shouldDisplay: ShouldDisplay;
 }
 
 export class BotConfigInputBox
@@ -24,7 +25,7 @@ export class BotConfigInputBox
       const next = parseInt(event.currentTarget.value, 10);
       const current = this.config.value;
       if (!_.isNaN(next) && (next !== current)) {
-        dispatch(updateConfig({ [key]: next }));
+        dispatch(updateConfig({ [key]: next }, this.props.shouldDisplay));
       }
     };
   }

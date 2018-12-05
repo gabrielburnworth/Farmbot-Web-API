@@ -34,7 +34,7 @@ const SingleSettingRow =
 export function Motors(props: MotorsProps) {
   const {
     dispatch, firmwareVersion, sourceFbosConfig, controlPanelState,
-    sourceFwConfig, isValidFwConfig
+    sourceFwConfig, isValidFwConfig, shouldDisplay
   } = props;
   const enable2ndXMotor = sourceFwConfig("movement_secondary_motor_x");
   const invert2ndXMotor = sourceFwConfig("movement_secondary_motor_invert_x");
@@ -53,6 +53,7 @@ export function Motors(props: MotorsProps) {
         <McuInputBox
           setting="param_mov_nr_retry"
           sourceFwConfig={sourceFwConfig}
+          shouldDisplay={shouldDisplay}
           dispatch={dispatch} />
       </SingleSettingRow>
       <SingleSettingRow settingType="button"
@@ -61,8 +62,9 @@ export function Motors(props: MotorsProps) {
         <ToggleButton
           toggleValue={eStopOnMoveError.value}
           dim={!eStopOnMoveError.consistent}
-          toggleAction={() => dispatch(
-            settingToggle("param_e_stop_on_mov_err", sourceFwConfig))} />
+          toggleAction={() => dispatch(settingToggle({
+            name: "param_e_stop_on_mov_err", sourceFwConfig, shouldDisplay
+          }))} />
       </SingleSettingRow>
       <NumericMCUInputGroup
         name={t("Max Speed (steps/s)")}
@@ -71,6 +73,7 @@ export function Motors(props: MotorsProps) {
         y={"movement_max_spd_y"}
         z={"movement_max_spd_z"}
         sourceFwConfig={sourceFwConfig}
+        shouldDisplay={shouldDisplay}
         dispatch={dispatch} />
       {(minFwVersionCheck(firmwareVersion, "5.0.5") || isValidFwConfig) &&
         <NumericMCUInputGroup
@@ -80,6 +83,7 @@ export function Motors(props: MotorsProps) {
           y={"movement_home_spd_y"}
           z={"movement_home_spd_z"}
           sourceFwConfig={sourceFwConfig}
+          shouldDisplay={shouldDisplay}
           dispatch={dispatch} />}
       <NumericMCUInputGroup
         name={t("Minimum Speed (steps/s)")}
@@ -88,6 +92,7 @@ export function Motors(props: MotorsProps) {
         y={"movement_min_spd_y"}
         z={"movement_min_spd_z"}
         sourceFwConfig={sourceFwConfig}
+        shouldDisplay={shouldDisplay}
         dispatch={dispatch} />
       <NumericMCUInputGroup
         name={t("Accelerate for (steps)")}
@@ -96,6 +101,7 @@ export function Motors(props: MotorsProps) {
         y={"movement_steps_acc_dec_y"}
         z={"movement_steps_acc_dec_z"}
         sourceFwConfig={sourceFwConfig}
+        shouldDisplay={shouldDisplay}
         dispatch={dispatch} />
       <StepsPerMmSettings
         dispatch={dispatch}
@@ -103,7 +109,8 @@ export function Motors(props: MotorsProps) {
         controlPanelState={controlPanelState}
         sourceFwConfig={sourceFwConfig}
         sourceFbosConfig={sourceFbosConfig}
-        isValidFwConfig={isValidFwConfig} />
+        isValidFwConfig={isValidFwConfig}
+        shouldDisplay={shouldDisplay} />
       <BooleanMCUInputGroup
         name={t("Always Power Motors")}
         tooltip={ToolTips.ALWAYS_POWER_MOTORS}
@@ -111,7 +118,8 @@ export function Motors(props: MotorsProps) {
         y={"movement_keep_active_y"}
         z={"movement_keep_active_z"}
         dispatch={dispatch}
-        sourceFwConfig={sourceFwConfig} />
+        sourceFwConfig={sourceFwConfig}
+        shouldDisplay={shouldDisplay} />
       <BooleanMCUInputGroup
         name={t("Invert Motors")}
         tooltip={ToolTips.INVERT_MOTORS}
@@ -119,15 +127,18 @@ export function Motors(props: MotorsProps) {
         y={"movement_invert_motor_y"}
         z={"movement_invert_motor_z"}
         dispatch={dispatch}
-        sourceFwConfig={sourceFwConfig} />
+        sourceFwConfig={sourceFwConfig}
+        shouldDisplay={shouldDisplay} />
       <SingleSettingRow settingType="button"
         label={t("Enable 2nd X Motor")}
         tooltip={ToolTips.ENABLE_X2_MOTOR}>
         <ToggleButton
           toggleValue={enable2ndXMotor.value}
           dim={!enable2ndXMotor.consistent}
-          toggleAction={() => dispatch(
-            settingToggle("movement_secondary_motor_x", sourceFwConfig))} />
+          toggleAction={() => dispatch(settingToggle({
+            name: "movement_secondary_motor_x", sourceFwConfig,
+            shouldDisplay
+          }))} />
       </SingleSettingRow>
       <SingleSettingRow settingType="button"
         label={t("Invert 2nd X Motor")}
@@ -136,8 +147,10 @@ export function Motors(props: MotorsProps) {
           grayscale={!enable2ndXMotor.value}
           toggleValue={invert2ndXMotor.value}
           dim={!invert2ndXMotor.consistent}
-          toggleAction={() => dispatch(
-            settingToggle("movement_secondary_motor_invert_x", sourceFwConfig))} />
+          toggleAction={() => dispatch(settingToggle({
+            name: "movement_secondary_motor_invert_x", sourceFwConfig,
+            shouldDisplay
+          }))} />
       </SingleSettingRow>
     </Collapse>
   </section>;

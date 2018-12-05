@@ -138,7 +138,7 @@ const BetaReleaseOptInButton =
         dim={!betaOptIn.consistent}
         toggleAction={() =>
           (betaOptInValue || confirm(Content.OS_BETA_RELEASES)) &&
-          dispatch(updateConfig(update))} />
+          dispatch(updateConfig(update, shouldDisplay))} />
     </fieldset>;
   };
 

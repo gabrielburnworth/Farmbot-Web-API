@@ -12,7 +12,7 @@ describe("BooleanMCUInputGroup", () => {
     const el = mount(<BooleanMCUInputGroup
       sourceFwConfig={(x) => {
         return { value: bot.hardware.mcu_params[x], consistent: true };
-      }}
+      }} shouldDisplay={jest.fn()}
       dispatch={dispatch}
       name={"Name"}
       x={"encoder_invert_x"}
@@ -24,12 +24,27 @@ describe("BooleanMCUInputGroup", () => {
     const zEl = el.find(ToggleButton).at(Buttons.zAxis);
     xEl.simulate("click");
     expect(settingToggle)
-      .toHaveBeenCalledWith("encoder_invert_x", expect.any(Function), undefined);
+      .toHaveBeenCalledWith({
+        name: "encoder_invert_x",
+        sourceFwConfig: expect.any(Function),
+        shouldDisplay: expect.any(Function),
+        displayAlert: undefined
+      });
     yEl.simulate("click");
     expect(settingToggle)
-      .toHaveBeenCalledWith("encoder_invert_y", expect.any(Function), undefined);
+      .toHaveBeenCalledWith({
+        name: "encoder_invert_y",
+        sourceFwConfig: expect.any(Function),
+        shouldDisplay: expect.any(Function),
+        displayAlert: undefined
+      });
     zEl.simulate("click");
     expect(settingToggle)
-      .toHaveBeenCalledWith("encoder_enabled_z", expect.any(Function), undefined);
+      .toHaveBeenCalledWith({
+        name: "encoder_enabled_z",
+        sourceFwConfig: expect.any(Function),
+        shouldDisplay: expect.any(Function),
+        displayAlert: undefined
+      });
   });
 });

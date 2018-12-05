@@ -68,7 +68,8 @@ const LogSetting = (props: LogSettingProps) => {
       toggleValue={config.value}
       dim={!config.consistent}
       toggleAction={() => {
-        props.dispatch(updateConfig({ [setting]: !config.value }));
+        props.dispatch(updateConfig({ [setting]: !config.value },
+          props.shouldDisplay));
         if (!config.value === true) {
           switch (setting) {
             case "firmware_output_log":
@@ -102,6 +103,7 @@ export const LogsSettingsMenu = (props: LogsSettingsMenuProps) => {
       setFilterLevel={setFilterLevel}
       dispatch={props.dispatch}
       sourceFbosConfig={sourceFbosConfig}
+      shouldDisplay={props.shouldDisplay}
       getConfigValue={getConfigValue} />;
   };
   return <div className={"logs-settings-menu"}>

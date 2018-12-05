@@ -5,7 +5,7 @@ import { success, warning, info, error } from "farmbot-toastr";
 import { getDevice } from "../device";
 import { Everything } from "../interfaces";
 import {
-  GithubRelease, MoveRelProps, MinOsFeatureLookup, SourceFwConfig, Axis
+  GithubRelease, MoveRelProps, MinOsFeatureLookup, SourceFwConfig, Axis, ShouldDisplay, Feature
 } from "./interfaces";
 import { Thunk, ReduxAction } from "../redux/interfaces";
 import {
@@ -242,10 +242,12 @@ export function MCUFactoryReset() {
 
 /** Toggle a firmware setting. */
 export function settingToggle(
-  name: ConfigKey,
-  sourceFwConfig: SourceFwConfig,
-  displayAlert?: string | undefined
-) {
+  { name, sourceFwConfig, displayAlert, shouldDisplay }: {
+    name: ConfigKey,
+    sourceFwConfig: SourceFwConfig,
+    displayAlert?: string | undefined,
+    shouldDisplay?: ShouldDisplay,
+  }) {
   const noun = "Setting toggle";
   return function (dispatch: Function, getState: () => Everything) {
     if (displayAlert) { alert(trim(displayAlert)); }
@@ -256,7 +258,8 @@ export function settingToggle(
       dispatch(apiSave(fwConfig.uuid));
     };
 
-    if (firmwareConfig && firmwareConfig.body.api_migrated) {
+    if (firmwareConfig && (firmwareConfig.body.api_migrated
+      || (shouldDisplay && shouldDisplay(Feature.api_fw_config)))) {
       return toggleFirmwareConfig(firmwareConfig);
     } else {
       return getDevice()
@@ -327,12 +330,14 @@ const updateNO = (dispatch: Function, noun: string) => {
 };
 
 /** Update firmware setting. */
-export function updateMCU(key: ConfigKey, val: string) {
+export function updateMCU(
+  key: ConfigKey, val: string, shouldDisplay: ShouldDisplay) {
   const noun = "Firmware config update";
   return function (dispatch: Function, getState: () => Everything) {
     const firmwareConfig = getFirmwareConfig(getState().resources.index);
     const getParams = () => {
-      if (firmwareConfig && firmwareConfig.body.api_migrated) {
+      if (firmwareConfig && (firmwareConfig.body.api_migrated
+        || (shouldDisplay && shouldDisplay(Feature.api_fw_config)))) {
         return firmwareConfig.body;
       } else {
         return getState().bot.hardware.mcu_params;
@@ -340,7 +345,8 @@ export function updateMCU(key: ConfigKey, val: string) {
     };
 
     function proceed() {
-      if (firmwareConfig && firmwareConfig.body.api_migrated) {
+      if (firmwareConfig && (firmwareConfig.body.api_migrated
+        || (shouldDisplay && shouldDisplay(Feature.api_fw_config)))) {
         dispatch(edit(firmwareConfig, { [key]: val } as Partial<FirmwareConfig>));
         dispatch(apiSave(firmwareConfig.uuid));
       } else {
@@ -360,11 +366,13 @@ export function updateMCU(key: ConfigKey, val: string) {
 }
 
 /** Update FBOS setting. */
-export function updateConfig(config: Configuration) {
+export function updateConfig(
+  config: Configuration, shouldDisplay: ShouldDisplay) {
   const noun = "FarmBot OS config update";
   return function (dispatch: Function, getState: () => Everything) {
     const fbosConfig = getFbosConfig(getState().resources.index);
-    if (fbosConfig && fbosConfig.body.api_migrated) {
+    if (fbosConfig && (fbosConfig.body.api_migrated
+      || (shouldDisplay && shouldDisplay(Feature.api_fbos_config)))) {
       dispatch(edit(fbosConfig, config as Partial<FbosConfig>));
       dispatch(apiSave(fbosConfig.uuid));
     } else {
