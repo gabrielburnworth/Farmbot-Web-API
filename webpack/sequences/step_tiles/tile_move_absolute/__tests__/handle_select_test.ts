@@ -1,7 +1,7 @@
 import { convertDDItoScopeDeclr } from "../handle_select";
 import { ScopeDeclarationBodyItem } from "farmbot";
 
-describe("handleSelect()", () => {
+describe("convertDDItoScopeDeclr()", () => {
   it("returns location data: point", () => {
     const ddi =
       ({ headingId: "GenericPointer", label: "Point 1 (10, 20, 30)", value: 2 });

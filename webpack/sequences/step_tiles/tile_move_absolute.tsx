@@ -60,7 +60,7 @@ export class TileMoveAbsolute extends Component<StepParams, MoveAbsState> {
   }
   get tool_id() { return this.tool && this.tool.body.id; }
   get slot(): TaggedToolSlotPointer | undefined {
-    return (this.tool_id) ?
+    return this.tool_id ?
       findSlotByToolId(this.resources, this.tool_id) : undefined;
   }
   get args(): MoveAbsolute["args"] { return (this.step as MoveAbsolute).args; }
@@ -69,6 +69,7 @@ export class TileMoveAbsolute extends Component<StepParams, MoveAbsState> {
     return (this.args.offset.args[val] || 0).toString();
   }
 
+  /** Merge step args update into step args. */
   updateArgs = (update: Partial<Args>) => {
     const copy = defensiveClone(this.props.currentSequence).body;
     const step = (copy.body || [])[this.props.index] as MoveAbsolute;
@@ -77,6 +78,7 @@ export class TileMoveAbsolute extends Component<StepParams, MoveAbsState> {
     this.props.dispatch(overwrite(this.props.currentSequence, copy));
   }
 
+  /** Get axis value for settingConflicts. */
   getAxisValue = (axis: Xyz): string => {
     let number: number | undefined;
     const l = this.args.location;
@@ -104,6 +106,7 @@ export class TileMoveAbsolute extends Component<StepParams, MoveAbsState> {
     return (number || 0).toString();
   }
 
+  /** Update offset value. */
   updateInputValue = (axis: Xyz, place: LocationArg) =>
     (e: React.SyntheticEvent<HTMLInputElement>) => {
       const num = parseFloat(e.currentTarget.value);
@@ -111,6 +114,7 @@ export class TileMoveAbsolute extends Component<StepParams, MoveAbsState> {
       this.updateArgs(_.merge({}, this.args, update));
     }
 
+  /** Determine if location conflicts with bot settings. */
   get settingConflicts(): Record<Xyz, boolean> {
     const conflicts = { x: false, y: false, z: false };
     if (this.props.hardwareFlags) {
@@ -140,7 +144,8 @@ export class TileMoveAbsolute extends Component<StepParams, MoveAbsState> {
       + conflictsString(this.settingConflicts);
   }
 
-  altHandleSelect = (SDBI: ScopeDeclarationBodyItem) => {
+  /** Handle changes to step.args.location. */
+  updateLocation = (SDBI: ScopeDeclarationBodyItem) => {
     const getLocation = (): DataValue => {
       switch (SDBI.kind) {
         case "variable_declaration":
@@ -153,6 +158,7 @@ export class TileMoveAbsolute extends Component<StepParams, MoveAbsState> {
     this.updateArgs({ location });
   }
 
+  /** Prepare step.args.location data for LocationForm. */
   get celeryNode(): ScopeDeclarationBodyItem {
     switch (this.args.location.kind) {
       case "identifier": return {
@@ -166,6 +172,63 @@ export class TileMoveAbsolute extends Component<StepParams, MoveAbsState> {
         };
     }
   }
+
+  LocationForm = () =>
+    <VariableForm
+      variable={{
+        celeryNode: this.celeryNode,
+        data_value: this.celeryNode,
+        dropdown: determineDropdown(this.celeryNode, this.resources),
+        location: determineLocation(this.resources, this.celeryNode),
+        editable: determineEditable(this.celeryNode),
+        variableValue: this.args.location,
+      }}
+      sequence={this.props.currentSequence}
+      resources={this.resources}
+      onChange={this.updateLocation}
+      width={3} />
+
+  SpeedForm = () =>
+    <Col xs={3}>
+      <label>
+        {t("Speed (%)")}
+      </label>
+      <StepInputBox
+        field={"speed"}
+        step={this.step}
+        index={this.props.index}
+        dispatch={this.props.dispatch}
+        sequence={this.props.currentSequence} />
+    </Col>
+
+  OffsetForm = () =>
+    <Row>
+      <Col xs={3}>
+        <InputBox
+          onCommit={this.updateInputValue("x", "offset")}
+          name="offset-x"
+          value={this.getOffsetValue("x")}>
+          {t("X-Offset")}
+        </InputBox>
+      </Col>
+      <Col xs={3}>
+        <InputBox
+          onCommit={this.updateInputValue("y", "offset")}
+          name="offset-y"
+          value={this.getOffsetValue("y")}>
+          {t("Y-Offset")}
+        </InputBox>
+      </Col>
+      <Col xs={3}>
+        <InputBox
+          onCommit={this.updateInputValue("z", "offset")}
+          name="offset-z"
+          value={this.getOffsetValue("z")}>
+          {t("Z-Offset")}
+        </InputBox>
+      </Col>
+      <this.SpeedForm />
+    </Row>
 
   render() {
     const { currentStep, dispatch, index, currentSequence } = this.props;
@@ -189,56 +252,8 @@ export class TileMoveAbsolute extends Component<StepParams, MoveAbsState> {
             conflicts={this.settingConflicts} />}
       </StepHeader>
       <StepContent className={className}>
-        <VariableForm
-          variable={{
-            celeryNode: this.celeryNode,
-            data_value: this.celeryNode,
-            dropdown: determineDropdown(this.celeryNode, this.resources),
-            location: determineLocation(this.resources, this.celeryNode),
-            editable: determineEditable(this.celeryNode),
-            variableValue: this.args.location,
-          }}
-          sequence={currentSequence}
-          resources={this.resources}
-          onChange={this.altHandleSelect}
-          width={3} />
-        <Row>
-          <Col xs={3}>
-            <InputBox
-              onCommit={this.updateInputValue("x", "offset")}
-              name="offset-x"
-              value={this.getOffsetValue("x")}>
-              {t("X-Offset")}
-            </InputBox>
-          </Col>
-          <Col xs={3}>
-            <InputBox
-              onCommit={this.updateInputValue("y", "offset")}
-              name="offset-y"
-              value={this.getOffsetValue("y")}>
-              {t("Y-Offset")}
-            </InputBox>
-          </Col>
-          <Col xs={3}>
-            <InputBox
-              onCommit={this.updateInputValue("z", "offset")}
-              name="offset-z"
-              value={this.getOffsetValue("z")}>
-              {t("Z-Offset")}
-            </InputBox>
-          </Col>
-          <Col xs={3}>
-            <label>
-              {t("Speed (%)")}
-            </label>
-            <StepInputBox
-              field={"speed"}
-              step={this.step}
-              index={index}
-              dispatch={this.props.dispatch}
-              sequence={this.props.currentSequence} />
-          </Col>
-        </Row>
+        <this.LocationForm />
+        <this.OffsetForm />
       </StepContent>
     </StepWrapper>;
   }

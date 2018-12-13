@@ -6,7 +6,7 @@ import {
 } from "./step_tiles/tile_move_absolute/generate_list";
 import { InputBox } from "./step_tiles/tile_move_absolute/input_box";
 import {
-  convertDDItoScopeDeclr, addOrEditDeclaration
+  convertDDItoScopeDeclr, addOrEditDeclaration, EMPTY_COORD
 } from "./step_tiles/tile_move_absolute/handle_select";
 import {
   VariableFormProps, LocalsListProps, PARENT
@@ -20,16 +20,18 @@ import {
 } from "farmbot";
 import { overwrite } from "../api/crud";
 import {
-  determineLocation, determineDropdown, determineEditable
+  determineLocation, determineDropdown, determineEditable, SequenceMeta
 } from "../resources/sequence_meta";
+import { ResourceIndex } from "../resources/interfaces";
 
+/** For VariableForm coordinate input boxes.  */
 interface AxisEditProps {
   axis: Xyz;
   onChange: (sd: ScopeDeclarationBodyItem) => void;
   declaration: ScopeDeclarationBodyItem;
 }
 
-/** Uses locals, declaration label, axis change to update locals. */
+/** Update a VariableDeclaration coordinate. */
 export const manuallyEditAxis = (props: AxisEditProps) =>
   (e: React.SyntheticEvent<HTMLInputElement>) => {
     const { axis, onChange, declaration } = props;
@@ -42,22 +44,39 @@ export const manuallyEditAxis = (props: AxisEditProps) =>
     }
   };
 
-/** When sequence.args.locals actually has variables, render this form.
- * Allows the user to chose the value of the `parent` variable, etc. */
+/** If a declaration with a matching label exists in local `declarations`
+ * (step body, etc.), use it instead of the one in scope declarations.
+ */
+const maybeUseStepData = ({ resources, declarations, variable }: {
+  resources: ResourceIndex,
+  declarations: ScopeDeclarationBodyItem[] | undefined,
+  variable: SequenceMeta
+}): SequenceMeta => {
+  if (declarations) {
+    const executeStepData = declarations
+      .filter(v => v.args.label === variable.celeryNode.args.label)[0];
+    if (executeStepData) {
+      return {
+        celeryNode: executeStepData,
+        location: determineLocation(resources, executeStepData),
+        editable: determineEditable(executeStepData),
+        dropdown: determineDropdown(executeStepData, resources),
+        variableValue: variable.celeryNode.kind === "parameter_declaration"
+          ? EMPTY_COORD : variable.celeryNode.args.data_value,
+      };
+    }
+  }
+  return variable;
+};
+
+/** Form with an "import from" dropdown and coordinate display/input boxes.
+ *  Can be used to set a specific value, import a value, or declare a variable.
+ */
 export const VariableForm =
   (props: VariableFormProps) => {
-    const { sequence, resources, onChange } = props;
-    let { location, editable, celeryNode, dropdown } = props.variable;
-    if (props.declarations) {
-      const executeStepData = props.declarations
-        .filter(v => v.args.label === celeryNode.args.label)[0];
-      if (executeStepData) {
-        celeryNode = executeStepData;
-        location = determineLocation(resources, executeStepData);
-        editable = determineEditable(executeStepData);
-        dropdown = determineDropdown(executeStepData, resources);
-      }
-    }
+    const { sequence, resources, onChange, declarations, variable } = props;
+    const { celeryNode, editable, dropdown, location } =
+      maybeUseStepData({ resources, declarations, variable });
     const isDisabled = !editable;
     const list = generateList(resources, [PARENT]);
     const label = celeryNode.args.label;
@@ -133,11 +152,11 @@ export const LocalsList = (props: LocalsListProps) => {
   return <div className="locals-list">
     {betterCompact(Object.values(props.variableData))
       .filter(v => props.hideDefined ? isParameterDeclaration(v.celeryNode) : v)
-      .map(val =>
+      .map(variable =>
         <VariableForm
-          key={val.celeryNode.args.label}
+          key={variable.celeryNode.args.label}
           declarations={props.declarations}
-          variable={val}
+          variable={variable}
           sequence={props.sequence}
           resources={props.resources}
           onChange={props.onChange} />)}

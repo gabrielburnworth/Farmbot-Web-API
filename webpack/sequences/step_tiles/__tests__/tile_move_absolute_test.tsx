@@ -234,14 +234,14 @@ describe("<TileMoveAbsolute/>", () => {
     });
   });
 
-  describe("handleSelect", () => {
+  describe("updateLocation", () => {
     it("handles empty selections", () => {
       const tma = ordinaryMoveAbs();
       tma.updateArgs = jest.fn();
       const location: Coordinate = {
         kind: "coordinate", args: { x: 0, y: 0, z: 0, }
       };
-      tma.altHandleSelect({
+      tma.updateLocation({
         kind: "variable_declaration",
         args: { label: "", data_value: location }
       });
@@ -269,7 +269,7 @@ describe("<TileMoveAbsolute/>", () => {
           kind: "variable_declaration",
           args: { label: "", data_value: data_value() }
         };
-        tma.altHandleSelect(sdbi);
+        tma.updateLocation(sdbi);
         expect(tma.updateArgs).toHaveBeenCalledWith({ location: data_value() });
       });
     });
@@ -277,7 +277,7 @@ describe("<TileMoveAbsolute/>", () => {
     it("handles bound / unbound variables", () => {
       const tma = ordinaryMoveAbs();
       set(tma.props, "dispatch", jest.fn());
-      tma.altHandleSelect({
+      tma.updateLocation({
         kind: "parameter_declaration",
         args: { label: "parent", data_type: "point" }
       });
