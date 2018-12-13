@@ -1,6 +1,6 @@
 import * as React from "react";
 import {
-  ParentVariableForm,
+  VariableForm,
   LocalsList,
 } from "../locals_list";
 import {
@@ -20,7 +20,7 @@ import {
   InputBox, generateList, convertDDItoScopeDeclr
 } from "../step_tiles/tile_move_absolute/index";
 import {
-  ParentVariableFormProps,
+  VariableFormProps,
   LocalsListProps,
   PARENT,
 } from "../locals_list_support";
@@ -46,8 +46,8 @@ const fakeProps = (): LocalsListProps => {
   };
 };
 
-const props: ParentVariableFormProps = {
-  parent: {
+const props: VariableFormProps = {
+  variable: {
     celeryNode: {
       kind: "parameter_declaration",
       args: { label: "label", data_type: "coordinate" }
@@ -62,9 +62,9 @@ const props: ParentVariableFormProps = {
   onChange: jest.fn()
 };
 
-describe("<ParentVariableForm/>", () => {
+describe("<VariableForm/>", () => {
   it("renders correct UI components", () => {
-    const el = shallow(<ParentVariableForm {...props} />);
+    const el = shallow(<VariableForm {...props} />);
     const selects = el.find(FBSelect);
     const inputs = el.find(InputBox);
 
@@ -79,7 +79,7 @@ describe("<ParentVariableForm/>", () => {
     const choice = choices[1];
     p.onChange(choice);
     expect(props.onChange)
-      .toHaveBeenCalledWith(convertDDItoScopeDeclr(choice));
+      .toHaveBeenCalledWith(convertDDItoScopeDeclr("label")(choice));
     expect(inputs.length).toBe(3);
   });
 });
@@ -90,7 +90,7 @@ describe("<LocalsList/>", () => {
     const p = fakeProps();
     p.sequence.body.args.locals = { kind: "scope_declaration", args: {} };
     const el = shallow(<LocalsList {...p} />);
-    expect(el.find(ParentVariableForm).length).toBe(0);
+    expect(el.find(VariableForm).length).toBe(0);
   });
 
   it("renders something", () => {
@@ -105,6 +105,6 @@ describe("<LocalsList/>", () => {
       }
     };
     const el = shallow(<LocalsList {...p} />);
-    expect(el.find(ParentVariableForm).length).toBe(1);
+    expect(el.find(VariableForm).length).toBe(1);
   });
 });

@@ -11,7 +11,8 @@ import {
   Identifier,
   MoveAbsolute,
   TaggedTool,
-  TaggedToolSlotPointer
+  TaggedToolSlotPointer,
+  ScopeDeclarationBodyItem
 } from "farmbot";
 import { Row, Col } from "../../ui/index";
 import {
@@ -25,7 +26,7 @@ import {
 import { defensiveClone, betterMerge } from "../../util";
 import { overwrite } from "../../api/crud";
 import { Xyz } from "../../devices/interfaces";
-import { TileMoveAbsSelect, InputBox, EMPTY_COORD } from "./tile_move_absolute/index";
+import { InputBox } from "./tile_move_absolute/index";
 import { ToolTips } from "../../constants";
 import {
   StepWrapper,
@@ -36,16 +37,17 @@ import {
 } from "../step_ui/index";
 import { StepInputBox } from "../inputs/step_input_box";
 import {
-  convertDropdownToLocation,
-  extractParent,
-  MoveAbsDropDownContents
+  determineDropdown, determineLocation, determineEditable, findVariableByName
 } from "../../resources/sequence_meta";
+import { VariableForm } from "../locals_list";
+
 interface Args {
   location: Tool | Coordinate | Point | Identifier;
   speed: number;
   offset: Coordinate;
 }
 type LocationArg = "location" | "offset";
+type DataValue = Coordinate | Identifier | Point | Tool;
 
 export class TileMoveAbsolute extends Component<StepParams, MoveAbsState> {
   get resources() { return this.props.resources; }
@@ -62,12 +64,6 @@ export class TileMoveAbsolute extends Component<StepParams, MoveAbsState> {
       findSlotByToolId(this.resources, this.tool_id) : undefined;
   }
   get args(): MoveAbsolute["args"] { return (this.step as MoveAbsolute).args; }
-
-  get xyzDisabled(): boolean {
-    type Keys = MoveAbsolute["args"]["location"]["kind"];
-    const choices: Keys[] = ["point", "tool", "identifier"];
-    return !!choices.includes(this.args.location.kind);
-  }
 
   getOffsetValue = (val: Xyz) => {
     return (this.args.offset.args[val] || 0).toString();
@@ -98,9 +94,10 @@ export class TileMoveAbsolute extends Component<StepParams, MoveAbsState> {
         break;
       case "identifier":
         const { resources, currentSequence } = this.props;
-        const p = extractParent(resources, currentSequence.uuid);
-        if (p) {
-          number = p.location[axis];
+        const v =
+          findVariableByName(resources, currentSequence.uuid, l.args.label);
+        if (v) {
+          number = v.location[axis];
           break;
         }
     }
@@ -143,32 +140,32 @@ export class TileMoveAbsolute extends Component<StepParams, MoveAbsState> {
       + conflictsString(this.settingConflicts);
   }
 
-  handleSelect = (result: MoveAbsDropDownContents) => {
-    const { currentSequence, dispatch } = this.props;
-    switch (result.kind) {
-      case "None":
-        return this.updateArgs({ location: EMPTY_COORD });
-      case "Point":
-      case "Tool":
-        return this.updateArgs({
-          location: convertDropdownToLocation(result)
-        });
-      case "BoundVariable":
-      case "UnboundVariable":
-        // Create a parent and attach to it
-        // STEP 1, Clone current sequence.
-        const clone = defensiveClone(currentSequence.body);
-        // STEP 2, do typecase to avoid extra conditionals
-        const s = (clone.body || [])[this.props.index] as MoveAbsolute;
-        // STEP 3, Figure out the `label` of the variable
-        //  (As of Dec '18, it is only "parent")
-        const { label } = result.kind === "BoundVariable" ?
-          result.body.celeryNode.args : result.body;
-        // Step 4: Attach the `identifier` to the current step:
-        s.args.location = ({ kind: "identifier", args: { label } });
-        return dispatch(overwrite(currentSequence, clone));
+  altHandleSelect = (SDBI: ScopeDeclarationBodyItem) => {
+    const getLocation = (): DataValue => {
+      switch (SDBI.kind) {
+        case "variable_declaration":
+          return SDBI.args.data_value;
+        case "parameter_declaration":
+          return { kind: "identifier", args: SDBI.args };
+      }
+    };
+    const location = getLocation();
+    this.updateArgs({ location });
+  }
+
+  get celeryNode(): ScopeDeclarationBodyItem {
+    switch (this.args.location.kind) {
+      case "identifier": return {
+        kind: "parameter_declaration",
+        args: { label: this.args.location.args.label, data_type: "point" }
+      };
+      default:
+        return {
+          kind: "variable_declaration",
+          args: { label: "", data_value: this.args.location }
+        };
     }
-  };
+  }
 
   render() {
     const { currentStep, dispatch, index, currentSequence } = this.props;
@@ -192,55 +189,19 @@ export class TileMoveAbsolute extends Component<StepParams, MoveAbsState> {
             conflicts={this.settingConflicts} />}
       </StepHeader>
       <StepContent className={className}>
-        <Row>
-          <Col md={12}>
-            <label>{t("Import coordinates from")}</label>
-            <TileMoveAbsSelect
-              resources={this.resources}
-              uuid={this.props.currentSequence.uuid}
-              selectedItem={this.args.location}
-              onChange={this.handleSelect}
-              shouldDisplay={this.props.shouldDisplay || (() => false)} />
-          </Col>
-          <Col xs={3}>
-            <InputBox
-              onCommit={this.updateInputValue("x", "location")}
-              disabled={this.xyzDisabled}
-              name="location-x"
-              value={this.getAxisValue("x")}>
-              {t("X (mm)")}
-            </InputBox>
-          </Col>
-          <Col xs={3}>
-            <InputBox
-              onCommit={this.updateInputValue("y", "location")}
-              disabled={this.xyzDisabled}
-              name="location-y"
-              value={this.getAxisValue("y")}>
-              {t("Y (mm)")}
-            </InputBox>
-          </Col>
-          <Col xs={3}>
-            <InputBox
-              onCommit={this.updateInputValue("z", "location")}
-              name="location-z"
-              disabled={this.xyzDisabled}
-              value={this.getAxisValue("z")}>
-              {t("Z (mm)")}
-            </InputBox>
-          </Col>
-          <Col xs={3}>
-            <label>
-              {t("Speed (%)")}
-            </label>
-            <StepInputBox
-              field={"speed"}
-              step={this.step}
-              index={index}
-              dispatch={this.props.dispatch}
-              sequence={this.props.currentSequence} />
-          </Col>
-        </Row>
+        <VariableForm
+          variable={{
+            celeryNode: this.celeryNode,
+            data_value: this.celeryNode,
+            dropdown: determineDropdown(this.celeryNode, this.resources),
+            location: determineLocation(this.resources, this.celeryNode),
+            editable: determineEditable(this.celeryNode),
+            variableValue: this.args.location,
+          }}
+          sequence={currentSequence}
+          resources={this.resources}
+          onChange={this.altHandleSelect}
+          width={3} />
         <Row>
           <Col xs={3}>
             <InputBox
@@ -265,6 +226,17 @@ export class TileMoveAbsolute extends Component<StepParams, MoveAbsState> {
               value={this.getOffsetValue("z")}>
               {t("Z-Offset")}
             </InputBox>
+          </Col>
+          <Col xs={3}>
+            <label>
+              {t("Speed (%)")}
+            </label>
+            <StepInputBox
+              field={"speed"}
+              step={this.step}
+              index={index}
+              dispatch={this.props.dispatch}
+              sequence={this.props.currentSequence} />
           </Col>
         </Row>
       </StepContent>

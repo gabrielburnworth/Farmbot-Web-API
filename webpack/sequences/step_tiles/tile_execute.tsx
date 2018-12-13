@@ -4,7 +4,7 @@ import { StepParams } from "../interfaces";
 import { t } from "i18next";
 import { Row, Col, DropDownItem } from "../../ui/index";
 import {
-  Execute, ScopeDeclaration, VariableDeclaration, ScopeDeclarationBodyItem
+  Execute, VariableDeclaration, ScopeDeclarationBodyItem
 } from "farmbot/dist";
 import { TaggedSequence } from "farmbot";
 import { ResourceIndex } from "../../resources/interfaces";
@@ -14,25 +14,25 @@ import { StepWrapper, StepHeader, StepContent } from "../step_ui/index";
 import { SequenceSelectBox } from "../sequence_select_box";
 import { ShouldDisplay, Feature } from "../../devices/interfaces";
 import { findSequenceById } from "../../resources/selectors_by_id";
-import { betterCompact } from "../../util";
 import { LocalsList } from "../locals_list";
+import { addOrEditDeclaration } from "./tile_move_absolute/handle_select";
 
-const isVariableDeclaration =
-  (x: ScopeDeclarationBodyItem): x is VariableDeclaration =>
-    x.kind === "variable_declaration";
-
-const assignVariable =
-  (props: ExecBlockParams) => (scopeDeclaration: ScopeDeclaration) => {
-    const { dispatch, currentSequence, currentStep, index } = props;
-    const declarations = betterCompact((scopeDeclaration.body || [])
-      .map(x => isVariableDeclaration(x) ? x : undefined));
-    dispatch(editStep({
-      step: currentStep,
-      sequence: currentSequence,
-      index: index,
-      executor(step) { step.body = declarations; }
-    }));
-  };
+/** Replaces the execute step body with a new array of declarations. */
+const assignVariable = (props: ExecBlockParams) =>
+  (declarations: ScopeDeclarationBodyItem[]) =>
+    (SDBI: ScopeDeclarationBodyItem) => {
+      const { dispatch, currentSequence, currentStep, index } = props;
+      dispatch(editStep({
+        step: currentStep,
+        sequence: currentSequence,
+        index: index,
+        executor(step) {
+          // TODO: add ParameterDeclaration to FBJS.
+          step.body =
+            addOrEditDeclaration(declarations)(SDBI).body as VariableDeclaration[];
+        }
+      }));
+    };
 
 export function ExecuteBlock(p: StepParams) {
   if (p.currentStep.kind === "execute") {
@@ -104,11 +104,13 @@ export class RefactoredExecuteBlock extends React.Component<ExecBlockParams, {}>
           {calledSequenceVariableData &&
             <Col xs={12}>
               <LocalsList
+                hideDefined={true}
+                declarations={currentStep.body}
                 variableData={calledSequenceVariableData}
                 sequence={currentSequence}
                 dispatch={dispatch}
                 resources={resources}
-                onChange={assignVariable(this.props)} />
+                onChange={assignVariable(this.props)(currentStep.body || [])} />
             </Col>}
         </Row>
       </StepContent>

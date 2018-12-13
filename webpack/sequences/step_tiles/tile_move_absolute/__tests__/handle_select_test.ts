@@ -5,9 +5,8 @@ describe("handleSelect()", () => {
   it("returns location data: point", () => {
     const ddi =
       ({ headingId: "GenericPointer", label: "Point 1 (10, 20, 30)", value: 2 });
-    const location = convertDDItoScopeDeclr(ddi);
-    const variable = (location.body || [])[0];
-    if (variable.kind === "variable_declaration") {
+    const variable = convertDDItoScopeDeclr("parent")(ddi);
+    if (variable && variable.kind === "variable_declaration") {
       expect(variable.args.data_value).toEqual({
         kind: "point",
         args: {
@@ -22,9 +21,8 @@ describe("handleSelect()", () => {
 
   it("returns location data: tool", () => {
     const ddi = { headingId: "Tool", label: "Generic Tool", value: 1 };
-    const location = convertDDItoScopeDeclr(ddi);
-    const variable = (location.body || [])[0];
-    if (variable.kind === "variable_declaration") {
+    const variable = convertDDItoScopeDeclr("parent")(ddi);
+    if (variable && variable.kind === "variable_declaration") {
       expect(variable.args.data_value)
         .toEqual({ kind: "tool", args: { tool_id: 1 } });
     } else {
@@ -33,30 +31,26 @@ describe("handleSelect()", () => {
   });
 
   it("returns location data: default", () => {
-    const location = convertDDItoScopeDeclr({
+    const variable = convertDDItoScopeDeclr("parent")({
       label: "None",
       value: "",
       isNull: true
     });
-    if (location && location.body) {
-      const [coord] = location.body;
-      if (coord.kind == "variable_declaration") {
-        expect(coord.args.data_value)
-          .toEqual({ kind: "coordinate", args: { x: 0, y: 0, z: 0 } });
-        return;
-      }
+    if (variable && variable.kind == "variable_declaration") {
+      expect(variable.args.data_value)
+        .toEqual({ kind: "coordinate", args: { x: 0, y: 0, z: 0 } });
+      return;
     }
     fail("No");
   });
 
   it("returns location data: parameter_declaration", () => {
     const ddi = ({ headingId: "parameter", label: "Parent", value: "parent" });
-    const location = convertDDItoScopeDeclr(ddi);
-    const parent = (location.body || [])[0];
+    const variable = convertDDItoScopeDeclr("parent")(ddi);
     const expected: ScopeDeclarationBodyItem = {
       "kind": "parameter_declaration",
       "args": { "data_type": "point", "label": "parent" }
     };
-    expect(parent).toEqual(expected);
+    expect(variable).toEqual(expected);
   });
 });

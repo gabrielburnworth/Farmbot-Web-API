@@ -24,12 +24,6 @@ export function activeTools(resources: ResourceIndex) {
     .map(tool => (tool && tool.kind === "Tool") ? tool : undefined));
 }
 
-export const PARENT_DDI: DropDownItem[] = [{
-  label: "Parent",
-  value: "parent",
-  headingId: "identifier",
-}];
-
 type DropdownHeadingId = PointerTypeName | typeof TOOL;
 
 export const NAME_MAP: Record<DropdownHeadingId, string> = {

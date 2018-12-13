@@ -20,7 +20,7 @@ jest.mock("../../devices/actions", () => ({
 
 jest.mock("../locals_list", () => ({
   LocalsList: () => <div />,
-  localListCallback: jest.fn(),
+  localListCallback: jest.fn(() => jest.fn()),
 }));
 
 import * as React from "react";

@@ -1,11 +1,8 @@
-import {
-  TaggedSequence,
-  ScopeDeclaration,
-} from "farmbot";
+import { TaggedSequence, ScopeDeclarationBodyItem } from "farmbot";
 import { ResourceIndex, VariableNameSet } from "../resources/interfaces";
 import { SequenceMeta } from "../resources/sequence_meta";
 
-type OnChange = (data_type: ScopeDeclaration) => void;
+type OnChange = (sd: ScopeDeclarationBodyItem | undefined) => void;
 
 export interface LocalsListProps {
   variableData: VariableNameSet;
@@ -13,13 +10,17 @@ export interface LocalsListProps {
   resources: ResourceIndex;
   dispatch: Function;
   onChange: OnChange;
+  hideDefined?: boolean;
+  declarations?: ScopeDeclarationBodyItem[];
 }
 
-export interface ParentVariableFormProps {
-  parent: SequenceMeta;
+export interface VariableFormProps {
+  declarations?: ScopeDeclarationBodyItem[];
+  variable: SequenceMeta;
   sequence: TaggedSequence;
   resources: ResourceIndex;
   onChange: OnChange;
+  width?: number;
 }
 
 export const PARENT =

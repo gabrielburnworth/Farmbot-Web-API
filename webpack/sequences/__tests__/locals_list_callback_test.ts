@@ -7,22 +7,24 @@ describe("localListCallback", () => {
     const sequence = fakeSequence();
     const dispatch = jest.fn();
     const cb = localListCallback({ sequence, dispatch });
-    cb({
-      kind: "scope_declaration",
-      args: {},
-      body: [
-        {
-          kind: "parameter_declaration",
-          args: { label: "parent", data_type: "coordinate" }
-        },
-        {
-          kind: "variable_declaration",
-          args: {
-            label: "foo",
-            data_value: { kind: "coordinate", args: { x: 0, y: 0, z: 0 } }
-          }
+    cb([
+      {
+        kind: "parameter_declaration",
+        args: { label: "parent", data_type: "coordinate" }
+      },
+      {
+        kind: "variable_declaration",
+        args: {
+          label: "foo",
+          data_value: { kind: "coordinate", args: { x: 0, y: 0, z: 0 } }
         }
-      ]
+      }
+    ])({
+      kind: "variable_declaration",
+      args: {
+        label: "foo",
+        data_value: { kind: "coordinate", args: { x: 1, y: 2, z: 3 } }
+      }
     });
     const action = expect.objectContaining({ type: "OVERWRITE_RESOURCE" });
     expect(dispatch)
@@ -52,29 +54,25 @@ describe("manuallyEditAxis", () => {
     };
     const axis = "x";
     const onChange = jest.fn();
-    const cb = manuallyEditAxis({ sequence, axis, onChange });
+    const cb = manuallyEditAxis({
+      axis, onChange, declaration: (sequence.body.args.locals.body || [])[0]
+    });
     type DomEvent = React.SyntheticEvent<HTMLInputElement>;
     const e: DeepPartial<DomEvent> = { currentTarget: { value: "1.23" } };
     cb(e as DomEvent);
     const expected = {
-      kind: "scope_declaration",
-      args: {},
-      body: [
-        {
-          kind: "variable_declaration",
+      kind: "variable_declaration",
+      args: {
+        label: "parent",
+        data_value: {
+          kind: "coordinate",
           args: {
-            label: "parent",
-            data_value: {
-              kind: "coordinate",
-              args: {
-                x: 1.23,
-                y: 20,
-                z: 30
-              }
-            }
+            x: 1.23,
+            y: 20,
+            z: 30
           }
         }
-      ]
+      }
     };
     expect(onChange).toHaveBeenCalledWith(expected);
   });

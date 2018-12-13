@@ -16,6 +16,7 @@ import { warning } from "farmbot-toastr";
 import { AllSteps } from "./all_steps";
 import { LocalsList, localListCallback } from "./locals_list";
 import { Feature } from "../devices/interfaces";
+import { betterCompact } from "../util";
 
 export const onDrop =
   (dispatch1: Function, sequence: TaggedSequence) =>
@@ -85,16 +86,19 @@ export const SequenceNameAndColor = ({ dispatch, sequence }: {
 const SequenceHeader = (props: SequenceHeaderProps) => {
   const { sequence, dispatch } = props;
   const sequenceAndDispatch = { sequence, dispatch };
+  const variableData = props.resources.sequenceMetas[sequence.uuid] || {};
+  const declarations = betterCompact(Object.values(variableData))
+    .map(d => d.celeryNode);
   return <div className="sequence-editor-tools">
     <SequenceBtnGroup {...sequenceAndDispatch} syncStatus={props.syncStatus} />
     <SequenceNameAndColor {...sequenceAndDispatch} />
     {props.shouldDisplay(Feature.variables) &&
       <LocalsList
-        variableData={props.resources.sequenceMetas[sequence.uuid] || {}}
+        variableData={variableData}
         sequence={sequence}
         dispatch={dispatch}
         resources={props.resources}
-        onChange={localListCallback(props)} />}
+        onChange={localListCallback(props)(declarations)} />}
   </div>;
 };
 

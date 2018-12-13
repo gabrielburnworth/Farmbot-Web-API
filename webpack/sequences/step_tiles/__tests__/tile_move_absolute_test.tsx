@@ -1,20 +1,19 @@
 import * as React from "react";
 import { TileMoveAbsolute } from "../tile_move_absolute";
 import { mount, ReactWrapper } from "enzyme";
-import { fakeSequence, fakePoint, fakeTool } from "../../../__test_support__/fake_state/resources";
-import { MoveAbsolute, SequenceBodyItem, Point } from "farmbot/dist";
+import {
+  fakeSequence, fakePoint, fakeTool
+} from "../../../__test_support__/fake_state/resources";
+import {
+  MoveAbsolute, SequenceBodyItem, Point, Coordinate, Tool, VariableDeclaration
+} from "farmbot/dist";
 import { buildResourceIndex } from "../../../__test_support__/resource_index_builder";
 import { SpecialStatus } from "farmbot";
 import { fakeHardwareFlags } from "../../../__test_support__/sequence_hardware_settings";
 import { emptyState } from "../../../resources/reducer";
-import {
-  convertDropdownToLocation,
-  SequenceMeta,
-  MoveAbsDropDownContents,
-  extractParent
-} from "../../../resources/sequence_meta";
 import { set } from "lodash";
 import { DeepPartial } from "redux";
+import { findVariableByName } from "../../../resources/sequence_meta";
 
 describe("<TileMoveAbsolute/>", () => {
   const fakeProps = () => {
@@ -63,7 +62,7 @@ describe("<TileMoveAbsolute/>", () => {
   ) {
     expect(block.find("label").at(position).text().toLowerCase())
       .toEqual(label);
-    expect(block.find("input").at(position).props().value)
+    expect(block.find("input").at(position + 1).props().value)
       .toEqual(value);
   }
 
@@ -73,18 +72,17 @@ describe("<TileMoveAbsolute/>", () => {
     const labels = block.find("label");
     const buttons = block.find("button");
     expect(inputs.length).toEqual(8);
-    expect(labels.length).toEqual(8);
+    expect(labels.length).toEqual(7);
     expect(buttons.length).toEqual(1);
     expect(inputs.first().props().placeholder).toEqual("Move Absolute");
-    expect(labels.at(0).text().toLowerCase()).toEqual("import coordinates from");
-    expect(buttons.at(0).text()).toEqual("None");
-    checkField(block, 1, "x (mm)", "1.1");
-    checkField(block, 2, "y (mm)", "2");
-    checkField(block, 3, "z (mm)", "3");
-    checkField(block, 4, "speed (%)", 100);
-    checkField(block, 5, "x-offset", "4.4");
-    checkField(block, 6, "y-offset", "5");
-    checkField(block, 7, "z-offset", "6");
+    expect(buttons.at(0).text()).toEqual("Coordinate (1.1, 2, 3)");
+    checkField(block, 0, "x (mm)", "1.1");
+    checkField(block, 1, "y (mm)", "2");
+    checkField(block, 2, "z (mm)", "3");
+    checkField(block, 6, "speed (%)", 100);
+    checkField(block, 3, "x-offset", "4.4");
+    checkField(block, 4, "y-offset", "5");
+    checkField(block, 5, "z-offset", "6");
   });
 
   it("retrieves a tool", () => {
@@ -202,7 +200,8 @@ describe("<TileMoveAbsolute/>", () => {
     ];
     p.currentSequence.body.body = [p.currentStep];
     p.resources = buildResourceIndex([p.currentSequence]).index;
-    expect(extractParent(p.resources, p.currentSequence.uuid)).toBeTruthy();
+    expect(findVariableByName(p.resources, p.currentSequence.uuid, "parent"))
+      .toBeTruthy();
     const tma = ordinaryMoveAbs(p);
     expect(tma.getAxisValue("z")).toBe("440");
   });
@@ -239,8 +238,13 @@ describe("<TileMoveAbsolute/>", () => {
     it("handles empty selections", () => {
       const tma = ordinaryMoveAbs();
       tma.updateArgs = jest.fn();
-      tma.handleSelect({ kind: "None", body: undefined });
-      const location = { kind: "coordinate", args: { x: 0, y: 0, z: 0, } };
+      const location: Coordinate = {
+        kind: "coordinate", args: { x: 0, y: 0, z: 0, }
+      };
+      tma.altHandleSelect({
+        kind: "variable_declaration",
+        args: { label: "", data_value: location }
+      });
       expect(tma.updateArgs).toHaveBeenCalledWith({ location });
     });
 
@@ -248,20 +252,35 @@ describe("<TileMoveAbsolute/>", () => {
       const tma = ordinaryMoveAbs();
       tma.updateArgs = jest.fn();
       [fakePoint(), fakeTool()].map(selection => {
-        tma.handleSelect(selection);
-        const location = convertDropdownToLocation(selection);
-        expect(tma.updateArgs).toHaveBeenCalledWith({ location });
+        const data_value = (): Tool | Point => {
+          switch (selection.kind) {
+            case "Tool": return {
+              kind: "tool", args: { tool_id: selection.body.id || 0 }
+            };
+            default: return {
+              kind: "point", args: {
+                pointer_type: selection.kind,
+                pointer_id: selection.body.id || 0
+              }
+            };
+          }
+        };
+        const sdbi: VariableDeclaration = {
+          kind: "variable_declaration",
+          args: { label: "", data_value: data_value() }
+        };
+        tma.altHandleSelect(sdbi);
+        expect(tma.updateArgs).toHaveBeenCalledWith({ location: data_value() });
       });
     });
 
     it("handles bound / unbound variables", () => {
       const tma = ordinaryMoveAbs();
       set(tma.props, "dispatch", jest.fn());
-      const x: MoveAbsDropDownContents = {
-        kind: "BoundVariable",
-        body: { celeryNode: { args: {} } } as SequenceMeta
-      };
-      tma.handleSelect(x);
+      tma.altHandleSelect({
+        kind: "parameter_declaration",
+        args: { label: "parent", data_type: "point" }
+      });
       expect(tma.props.dispatch).toHaveBeenCalled();
       const action = expect.objectContaining({ type: "OVERWRITE_RESOURCE" });
       expect(tma.props.dispatch).toHaveBeenCalledWith(action);
