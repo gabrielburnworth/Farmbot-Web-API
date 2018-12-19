@@ -15,7 +15,7 @@ import { TestButton } from "./test_button";
 import { warning } from "farmbot-toastr";
 import { AllSteps } from "./all_steps";
 import { LocalsList, localListCallback } from "./locals_list";
-import { Feature } from "../devices/interfaces";
+import { betterCompact } from "../util";
 
 export const onDrop =
   (dispatch1: Function, sequence: TaggedSequence) =>
@@ -85,25 +85,30 @@ export const SequenceNameAndColor = ({ dispatch, sequence }: {
 const SequenceHeader = (props: SequenceHeaderProps) => {
   const { sequence, dispatch } = props;
   const sequenceAndDispatch = { sequence, dispatch };
+  const variableData = props.resources.sequenceMetas[sequence.uuid] || {};
+  const declarations = betterCompact(Object.values(variableData))
+    .map(d => d.celeryNode);
   return <div className="sequence-editor-tools">
     <SequenceBtnGroup {...sequenceAndDispatch} syncStatus={props.syncStatus} />
     <SequenceNameAndColor {...sequenceAndDispatch} />
-    {props.shouldDisplay(Feature.variables) &&
-      <LocalsList
-        variableData={props.resources.sequenceMetas[sequence.uuid] || {}}
-        sequence={sequence}
-        dispatch={dispatch}
-        resources={props.resources}
-        onChange={localListCallback(props)} />}
+    <LocalsList
+      variableData={variableData}
+      sequence={sequence}
+      dispatch={dispatch}
+      resources={props.resources}
+      onChange={localListCallback(props)(declarations)}
+      shouldDisplay={props.shouldDisplay} />
   </div>;
 };
 
 export class SequenceEditorMiddleActive extends
   React.Component<ActiveMiddleProps, {}> {
+
+  /** Make room for the sequence header variable form when necessary. */
   get stepSectionHeight() {
     const { resources, sequence } = this.props;
-    const variables = this.props.shouldDisplay(Feature.variables)
-      && Object.keys(resources.sequenceMetas[sequence.uuid]).length > 0;
+    const variables =
+      Object.keys(resources.sequenceMetas[sequence.uuid] || {}).length > 0;
     return `calc(100vh - ${variables ? "38" : "25"}rem)`;
   }
 

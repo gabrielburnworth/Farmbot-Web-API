@@ -1,80 +1,118 @@
 /** Given a drop down item and a ResourceIndex,
  * figures out the corresponding Tool | Coordinate | Point */
 import { DropDownItem } from "../../../ui/index";
-import { LocationData } from "./interfaces";
 import {
-  ParameterDeclaration,
   Coordinate,
   ScopeDeclaration,
   ScopeDeclarationBodyItem,
-  VariableDeclaration
+  VariableDeclaration,
+  Dictionary,
+  Identifier,
+  Point,
+  Tool
 } from "farmbot";
 
-export type CeleryVariable = LocationData | ParameterDeclaration;
 export const EMPTY_COORD: Coordinate =
   ({ kind: "coordinate", args: { x: 0, y: 0, z: 0 } });
 
-const toolVar = (value: string | number): VariableDeclaration => ({
-  kind: "variable_declaration",
-  args: {
-    label: "parent",
-    data_value: {
-      kind: "tool",
-      args: {
-        tool_id: parseInt("" + value)
-      }
-    }
-  }
-});
+type DataValue = Coordinate | Identifier | Point | Tool;
+const createVariableDeclaration =
+  (label: string, data_value: DataValue): VariableDeclaration =>
+    ({
+      kind: "variable_declaration",
+      args: { label, data_value }
+    });
 
-const pointVar =
-  (pointer_type: "Plant" | "GenericPointer", value: string | number): VariableDeclaration => ({
-    kind: "variable_declaration",
-    args: {
-      label: "parent",
-      data_value: {
-        kind: "point",
-        args: { pointer_type, pointer_id: parseInt("" + value) }
-      }
-    }
+const toolVar = (value: string | number) =>
+  ({ label }: { label: string }): VariableDeclaration =>
+    createVariableDeclaration(label, {
+      kind: "tool",
+      args: { tool_id: parseInt("" + value) }
+    });
+
+const pointVar = (
+  pointer_type: "Plant" | "GenericPointer",
+  value: string | number
+) => ({ label }: { label: string }): VariableDeclaration =>
+    createVariableDeclaration(label, {
+      kind: "point",
+      args: { pointer_type, pointer_id: parseInt("" + value) }
+    });
+
+const manualEntry = ({ label }: { label: string }): VariableDeclaration =>
+  createVariableDeclaration(label, {
+    kind: "coordinate", args: { x: 0, y: 0, z: 0 }
   });
 
-const manualEntry: VariableDeclaration = {
-  kind: "variable_declaration",
-  args: {
-    label: "parent",
-    data_value: { kind: "coordinate", args: { x: 0, y: 0, z: 0 } }
+/**
+ * Create a parameter declaration or a variable declaration containing an
+ *    identifier.
+ * `data_type` type will need to be updated to support types other than "point"
+ */
+export const newParameter =
+  ({ label, newVarLabel, useIdentifier, data_type }: {
+    label: string,
+    newVarLabel?: string,
+    data_type?: "point",
+    useIdentifier?: boolean
+  }): ScopeDeclarationBodyItem =>
+    (useIdentifier && newVarLabel)
+      ? { // Create a new variable (reassignment)
+        kind: "variable_declaration",
+        args: {
+          label, data_value: {
+            kind: "identifier", args: { label: newVarLabel }
+          }
+        }
+      }
+      : { // Unbind variable (will not create a new variable name)
+        kind: "parameter_declaration",
+        args: { label, data_type: data_type || "point" }
+      };
+
+const newDeclarationCreator = (ddi: DropDownItem):
+  ({ label, newVarLabel, useIdentifier }: {
+    label: string,
+    newVarLabel?: string,
+    useIdentifier?: boolean
+  }) => ScopeDeclarationBodyItem | undefined => {
+  if (ddi.isNull) { return manualEntry; } // Caller decides X/Y/Z
+  switch (ddi.headingId) {
+    case "Plant":
+    case "GenericPointer": return pointVar(ddi.headingId, ddi.value);
+    case "Tool": return toolVar(ddi.value);
+    case "parameter": return newParameter; // Caller decides X/Y/Z
+    case "Other": return manualEntry;
   }
+  return () => undefined;
 };
 
-export const EMPTY_PARENT: ParameterDeclaration = {
-  kind: "parameter_declaration",
-  args: { label: "parent", data_type: "point" }
-};
+/** Convert a drop down selection to a declaration. */
+export const convertDDItoDeclaration =
+  ({ label, useIdentifier }: { label: string, useIdentifier?: boolean }) =>
+    (ddi: DropDownItem): ScopeDeclarationBodyItem | undefined => {
+      const newVarLabel =
+        ddi.headingId === "parameter" ? "" + ddi.value : undefined;
+      return newDeclarationCreator(ddi)({ label, newVarLabel, useIdentifier });
+    };
 
-export const EMPTY_LOCALS_LIST: ScopeDeclaration = {
-  kind: "scope_declaration",
-  args: {},
-  body: [EMPTY_PARENT]
-};
-
-const createNewParent =
-  (input: DropDownItem): ScopeDeclarationBodyItem | undefined => {
-    if (input.isNull) { return manualEntry; } // Caller decides X/Y/Z
-    switch (input.headingId) {
-      case "Plant":
-      case "GenericPointer": return pointVar(input.headingId, input.value);
-      case "Tool": return toolVar(input.value);
-      case "parameter": return EMPTY_PARENT; // Caller decides X/Y/Z
-      case "Other": return manualEntry;
-    }
-    return undefined;
+/** Add a new declaration or replace an existing one with the same label. */
+export const addOrEditDeclaration = (declarations: ScopeDeclarationBodyItem[]) =>
+  (updatedItem: ScopeDeclarationBodyItem): ScopeDeclaration => {
+    const items = reduceScopeDeclaration(declarations);
+    items[updatedItem.args.label] = updatedItem;
+    const newLocals: ScopeDeclaration = {
+      kind: "scope_declaration",
+      args: {},
+      body: Object.values(items)
+    };
+    return newLocals;
   };
 
-export let convertDDItoScopeDeclr =
-  (input: DropDownItem): ScopeDeclaration => {
-    const p = createNewParent(input);
-    const sd: ScopeDeclaration =
-      ({ kind: "scope_declaration", args: {}, body: (p ? [p] : []) });
-    return sd;
-  };
+/** Convert scope declaration body items to a dictionary for lookup purposes. */
+const reduceScopeDeclaration = (declarations: ScopeDeclarationBodyItem[]):
+  Dictionary<ScopeDeclarationBodyItem> => {
+  const items: Dictionary<ScopeDeclarationBodyItem> = {};
+  declarations.map(d => items[d.args.label] = d);
+  return items;
+};

@@ -5,85 +5,138 @@ import {
   generateList
 } from "./step_tiles/tile_move_absolute/generate_list";
 import { InputBox } from "./step_tiles/tile_move_absolute/input_box";
-import { convertDDItoScopeDeclr } from "./step_tiles/tile_move_absolute/handle_select";
-import { ParentVariableFormProps, LocalsListProps, PARENT } from "./locals_list_support";
+import {
+  convertDDItoDeclaration, addOrEditDeclaration
+} from "./step_tiles/tile_move_absolute/handle_select";
+import {
+  LocationFormProps, LocalsListProps, PARENT
+} from "./locals_list_support";
 import { defensiveClone, betterCompact } from "../util/util";
 import {
   Xyz,
-  ScopeDeclaration,
   TaggedSequence,
+  ScopeDeclarationBodyItem,
+  ParameterDeclaration,
 } from "farmbot";
 import { overwrite } from "../api/crud";
+import {
+  determineVector, determineDropdown, determineEditable, SequenceMeta
+} from "../resources/sequence_meta";
+import { ResourceIndex, UUID } from "../resources/interfaces";
+import { Feature } from "../devices/interfaces";
 
-interface AxisEditProps {
-  sequence: TaggedSequence;
+/** For LocationForm coordinate input boxes.  */
+export interface AxisEditProps {
   axis: Xyz;
-  onChange: (sd: ScopeDeclaration) => void;
+  onChange: (sd: ScopeDeclarationBodyItem) => void;
+  declaration: ScopeDeclarationBodyItem;
 }
 
-export const manuallyEditAxis = ({ sequence, axis, onChange }: AxisEditProps) =>
+/** Update a VariableDeclaration coordinate. */
+export const manuallyEditAxis = (props: AxisEditProps) =>
   (e: React.SyntheticEvent<HTMLInputElement>) => {
+    const { axis, onChange, declaration } = props;
     const num = parseFloat(e.currentTarget.value);
-    const locals = defensiveClone(sequence.body.args.locals);
-    locals.body = locals.body || [];
-    const [declaration] = locals.body;
-    if (declaration &&
-      declaration.kind === "variable_declaration" &&
+    if (declaration.kind === "variable_declaration" &&
       declaration.args.data_value.kind === "coordinate") {
       declaration.args.data_value.args[axis] = num;
-      !isNaN(num) && onChange(locals);
+      !isNaN(num) && onChange(declaration);
     }
   };
 
-/** When sequence.args.locals actually has variables, render this form.
- * Allows the user to chose the value of the `parent` variable, etc. */
-export const ParentVariableForm =
-  (props: ParentVariableFormProps) => {
-    const { sequence, resources, onChange } = props;
-    const { x, y, z } = props.parent.location;
-    const isDisabled = !props.parent.editable;
-    const list = generateList(resources, [PARENT]);
-    return <div className="parent-variable-form">
+/**
+ * If a declaration with a matching label exists in local `declarations`
+ * (step body, etc.), use it instead of the one in scope declarations.
+ */
+const maybeUseStepData = ({ resources, declarations, variable, uuid }: {
+  resources: ResourceIndex,
+  declarations: ScopeDeclarationBodyItem[] | undefined,
+  variable: SequenceMeta,
+  uuid: UUID,
+}): SequenceMeta => {
+  if (declarations) {
+    const executeStepData = declarations
+      .filter(v => v.args.label === variable.celeryNode.args.label)[0];
+    if (executeStepData) {
+      return {
+        celeryNode: executeStepData,
+        vector: determineVector(executeStepData, resources, uuid),
+        dropdown: determineDropdown(executeStepData, resources),
+      };
+    }
+  }
+  return variable;
+};
+
+/**
+ * Form with an "import from" dropdown and coordinate display/input boxes.
+ * Can be used to set a specific value, import a value, or declare a variable.
+ */
+export const LocationForm =
+  (props: LocationFormProps) => {
+    const {
+      sequence, resources, onChange, declarations, variable,
+      hideVariableLabel, useIdentifier
+    } = props;
+    const { uuid } = props.sequence;
+    const { celeryNode, dropdown, vector } =
+      maybeUseStepData({ resources, declarations, variable, uuid });
+    /** For disabling coordinate input boxes when using external data. */
+    const isDisabled = !determineEditable(celeryNode);
+    const variableListItems =
+      props.shouldDisplay(Feature.variables) ? [PARENT] : [];
+    const list = generateList(resources, variableListItems);
+    /** Variable name. */
+    const { label } = celeryNode.args;
+    const declaration = defensiveClone(celeryNode);
+    const axisPartialProps = { onChange, declaration };
+    const formTitle = hideVariableLabel
+      ? t("Location")
+      : `${label} (${t("Location")})`;
+    return <div className="location-form">
       <Row>
         <Col xs={12}>
-          <h5>{t("Import Coordinates From")}</h5>
+          <label>{formTitle}</label>
           <FBSelect
             key={JSON.stringify(sequence)}
             allowEmpty={true}
             list={list}
-            selectedItem={props.parent.dropdown}
-            onChange={ddi => onChange(convertDDItoScopeDeclr(ddi))} />
+            selectedItem={dropdown}
+            customNullLabel={t("Coordinate")}
+            onChange={ddi =>
+              onChange(convertDDItoDeclaration({ label, useIdentifier })(ddi))} />
         </Col>
       </Row>
-      <Row>
-        <Col xs={4}>
-          <InputBox
-            onCommit={manuallyEditAxis({ ...props, axis: "x" })}
-            disabled={isDisabled}
-            name="location-x-variabledeclr"
-            value={"" + x}>
-            {t("X (mm)")}
-          </InputBox>
-        </Col>
-        <Col xs={4}>
-          <InputBox
-            onCommit={manuallyEditAxis({ ...props, axis: "y" })}
-            disabled={isDisabled}
-            name="location-y-variabledeclr"
-            value={"" + y}>
-            {t("Y (mm)")}
-          </InputBox>
-        </Col>
-        <Col xs={4}>
-          <InputBox
-            onCommit={manuallyEditAxis({ ...props, axis: "z" })}
-            name="location-z-variabledeclr"
-            disabled={isDisabled}
-            value={"" + z}>
-            {t("Z (mm)")}
-          </InputBox>
-        </Col>
-      </Row>
+      {vector &&
+        <Row>
+          <Col xs={props.width || 4}>
+            <InputBox
+              onCommit={manuallyEditAxis({ ...axisPartialProps, axis: "x" })}
+              disabled={isDisabled}
+              name="location-x"
+              value={"" + vector.x}>
+              {t("X (mm)")}
+            </InputBox>
+          </Col>
+          <Col xs={props.width || 4}>
+            <InputBox
+              onCommit={manuallyEditAxis({ ...axisPartialProps, axis: "y" })}
+              disabled={isDisabled}
+              name="location-y"
+              value={"" + vector.y}>
+              {t("Y (mm)")}
+            </InputBox>
+          </Col>
+          <Col xs={props.width || 4}>
+            <InputBox
+              onCommit={manuallyEditAxis({ ...axisPartialProps, axis: "z" })}
+              name="location-z"
+              disabled={isDisabled}
+              value={"" + vector.z}>
+              {t("Z (mm)")}
+            </InputBox>
+          </Col>
+        </Row>}
     </div>;
   };
 
@@ -92,23 +145,38 @@ interface LocalListCbProps {
   sequence: TaggedSequence;
 }
 
+/** Overwrite sequence locals (scope declaration). */
 export const localListCallback =
-  ({ dispatch, sequence }: LocalListCbProps) => (locals: ScopeDeclaration) => {
-    const clone = defensiveClone(sequence.body); // unfortunate
-    clone.args.locals = locals;
-    dispatch(overwrite(sequence, clone));
-  };
+  ({ dispatch, sequence }: LocalListCbProps) =>
+    (declarations: ScopeDeclarationBodyItem[]) =>
+      (declaration: ScopeDeclarationBodyItem) => {
+        const clone = defensiveClone(sequence.body); // unfortunate
+        clone.args.locals = addOrEditDeclaration(declarations)(declaration);
+        dispatch(overwrite(sequence, clone));
+      };
 
-/** List of local variable declarations for a sequence. If no variables are
- * found, shows nothing. */
+export const isParameterDeclaration =
+  (x: ScopeDeclarationBodyItem): x is ParameterDeclaration =>
+    x.kind === "parameter_declaration";
+
+/**
+ * List of local variable/parameter declarations for a sequence.
+ * If none are found, shows nothing.
+ */
 export const LocalsList = (props: LocalsListProps) => {
   return <div className="locals-list">
-    {betterCompact(Object.values(props.variableData)).map(val =>
-      <ParentVariableForm
-        key={val.celeryNode.args.label}
-        parent={val}
-        sequence={props.sequence}
-        resources={props.resources}
-        onChange={props.onChange} />)}
+    {betterCompact(Object.values(props.variableData))
+      .filter(v => props.hideDefined ? isParameterDeclaration(v.celeryNode) : v)
+      .map(variable =>
+        <LocationForm
+          key={variable.celeryNode.args.label}
+          declarations={props.declarations}
+          variable={variable}
+          sequence={props.sequence}
+          resources={props.resources}
+          shouldDisplay={props.shouldDisplay}
+          hideVariableLabel={Object.values(props.variableData).length < 2}
+          useIdentifier={props.useIdentifier}
+          onChange={props.onChange} />)}
   </div>;
 };

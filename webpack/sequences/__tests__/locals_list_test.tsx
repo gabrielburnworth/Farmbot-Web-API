@@ -1,110 +1,135 @@
 import * as React from "react";
+import { LocationForm, LocalsList } from "../locals_list";
+import { VariableDeclaration, Coordinate } from "farmbot";
 import {
-  ParentVariableForm,
-  LocalsList,
-} from "../locals_list";
-import {
-  VariableDeclaration,
-  Coordinate
-} from "farmbot";
-import {
-  fakeSequence,
-  fakeTool
+  fakeSequence
 } from "../../__test_support__/fake_state/resources";
-import { shallow } from "enzyme";
+import { shallow, mount } from "enzyme";
 import {
   buildResourceIndex
 } from "../../__test_support__/resource_index_builder";
 import { FBSelect } from "../../ui/index";
 import {
-  InputBox, generateList, convertDDItoScopeDeclr
+  InputBox, generateList, convertDDItoDeclaration as convertDDItoDeclaration
 } from "../step_tiles/tile_move_absolute/index";
 import {
-  ParentVariableFormProps,
-  LocalsListProps,
-  PARENT,
+  LocationFormProps, LocalsListProps, PARENT
 } from "../locals_list_support";
 import { difference } from "lodash";
+import { VariableNameSet } from "../../resources/interfaces";
 
-const coord: Coordinate = { kind: "coordinate", args: { x: 1, y: 2, z: 3 } };
-const t = fakeTool();
-t.body.id = 5;
-const mrGoodVar: VariableDeclaration = {
-  // https://en.wikipedia.org/wiki/Mr._Goodbar
-  kind: "variable_declaration",
-  args: { label: "parent", data_value: coord }
-};
-
-const fakeProps = (): LocalsListProps => {
-  const sequence = fakeSequence();
-  return {
-    variableData: {},
-    sequence: sequence,
-    resources: buildResourceIndex([sequence]).index,
-    dispatch: jest.fn(),
-    onChange: jest.fn(),
-  };
-};
-
-const props: ParentVariableFormProps = {
-  parent: {
-    celeryNode: {
-      kind: "parameter_declaration",
-      args: { label: "label", data_type: "coordinate" }
+describe("<LocationForm/>", () => {
+  const fakeProps = (): LocationFormProps => ({
+    variable: {
+      celeryNode: {
+        kind: "parameter_declaration",
+        args: { label: "label", data_type: "coordinate" }
+      },
+      dropdown: { label: "label", value: 0 },
+      vector: { x: 0, y: 0, z: 0 }
     },
-    editable: false,
-    variableValue: { kind: "coordinate", args: { x: 0, y: 0, z: 0 } },
-    dropdown: { label: "label", value: 0 },
-    location: { x: 0, y: 0, z: 0 }
-  },
-  sequence: fakeSequence(),
-  resources: buildResourceIndex().index,
-  onChange: jest.fn()
-};
+    sequence: fakeSequence(),
+    resources: buildResourceIndex().index,
+    onChange: jest.fn(),
+    shouldDisplay: jest.fn(),
+  });
 
-describe("<ParentVariableForm/>", () => {
   it("renders correct UI components", () => {
-    const el = shallow(<ParentVariableForm {...props} />);
+    const p = fakeProps();
+    const el = shallow(<LocationForm {...p} />);
     const selects = el.find(FBSelect);
     const inputs = el.find(InputBox);
 
     expect(selects.length).toBe(1);
-    const p = selects.first().props();
-    expect(p.allowEmpty).toBe(true);
-    const choices = generateList(props.resources, [PARENT]);
-    const actualLabels = p.list.map(x => x.label).sort();
+    const select = selects.first().props();
+    expect(select.allowEmpty).toBe(true);
+    const choices = generateList(p.resources, [PARENT]);
+    const actualLabels = select.list.map(x => x.label).sort();
     const expectedLabels = choices.map(x => x.label).sort();
     const diff = difference(actualLabels, expectedLabels);
     expect(diff).toEqual([]);
     const choice = choices[1];
-    p.onChange(choice);
-    expect(props.onChange)
-      .toHaveBeenCalledWith(convertDDItoScopeDeclr(choice));
+    select.onChange(choice);
+    expect(p.onChange)
+      .toHaveBeenCalledWith(convertDDItoDeclaration({ label: "label" })(choice));
     expect(inputs.length).toBe(3);
+  });
+
+  it("uses local declaration data", () => {
+    const p = fakeProps();
+    p.declarations = [{
+      kind: "variable_declaration",
+      args: {
+        label: "label", data_value: {
+          kind: "identifier", args: { label: "new_var" }
+        }
+      }
+    }];
+    const wrapper = mount(<LocationForm {...p} />);
+    expect(wrapper.text().toLowerCase()).toContain("new_var");
+  });
+
+  it("shows parent in dropdown", () => {
+    const p = fakeProps();
+    p.shouldDisplay = () => true;
+    const wrapper = shallow(<LocationForm {...p} />);
+    expect(wrapper.find(FBSelect).first().props().list).toContain(PARENT);
+  });
+
+  it("doesn't show parent in dropdown", () => {
+    const p = fakeProps();
+    const wrapper = shallow(<LocationForm {...p} />);
+    expect(wrapper.find(FBSelect).first().props().list).not.toContain(PARENT);
   });
 });
 
 describe("<LocalsList/>", () => {
+  const coordinate: Coordinate = {
+    kind: "coordinate",
+    args: { x: 1, y: 2, z: 3 }
+  };
+  const mrGoodVar: VariableDeclaration = {
+    // https://en.wikipedia.org/wiki/Mr._Goodbar
+    kind: "variable_declaration",
+    args: { label: "parent", data_value: coordinate }
+  };
+  const variableData: VariableNameSet = {
+    parent: {
+      celeryNode: mrGoodVar,
+      dropdown: { value: "parent", label: "parent" },
+      vector: coordinate.args,
+    }
+  };
 
-  it("renders nothing", () => {
-    const p = fakeProps();
-    p.sequence.body.args.locals = { kind: "scope_declaration", args: {} };
-    const el = shallow(<LocalsList {...p} />);
-    expect(el.find(ParentVariableForm).length).toBe(0);
+  const fakeProps = (): LocalsListProps => {
+    const sequence = fakeSequence();
+    return {
+      variableData: {},
+      sequence: sequence,
+      resources: buildResourceIndex([sequence]).index,
+      dispatch: jest.fn(),
+      onChange: jest.fn(),
+      shouldDisplay: jest.fn(),
+    };
+  };
+
+  it("doesn't have any declarations to render", () => {
+    const wrapper = shallow(<LocalsList {...fakeProps()} />);
+    expect(wrapper.find(LocationForm).length).toBe(0);
   });
 
-  it("renders something", () => {
+  it("shows all variables", () => {
     const p = fakeProps();
-    p.variableData = {
-      parent: {
-        celeryNode: mrGoodVar,
-        dropdown: { value: "parent", label: "parent" },
-        location: coord.args,
-        editable: false,
-        variableValue: coord
-      }
-    };
-    const el = shallow(<LocalsList {...p} />);
-    expect(el.find(ParentVariableForm).length).toBe(1);
+    p.variableData = variableData;
+    const wrapper = shallow(<LocalsList {...p} />);
+    expect(wrapper.find(LocationForm).length).toBe(1);
+  });
+
+  it("hides already assigned variables", () => {
+    const p = fakeProps();
+    p.hideDefined = true;
+    p.variableData = variableData;
+    const wrapper = shallow(<LocalsList {...p} />);
+    expect(wrapper.find(LocationForm).length).toBe(0);
   });
 });
