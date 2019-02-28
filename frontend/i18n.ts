@@ -16,15 +16,19 @@ export function getUserLang(
     .catch(() => "en");
 }
 
+const parseTranslationData = (data: string) =>
+  JSON.parse(data.substring(data.indexOf("{")).replace(/(^\s*\/\/.*)/gm, ""));
+
 export function generateI18nConfig(lang: string): Promise<InitOptions> {
   return axios
     .get<string>(`/app-resources/languages/${lang}.js`)
-    .then(_x => {
+    .then(response => {
+      const translation = parseTranslationData(response.data);
       return {
         nsSeparator: "",
         keySeparator: "",
         lng: lang,
-        resources: { [lang]: { translation: {} } }
+        resources: { [lang]: { translation } }
       };
     });
 }
