@@ -37,7 +37,7 @@ services:
 
   db:
     env_file: ".env"
-    image: postgres:10
+    image: postgres@sha256:a2248950711dbeb7bc5b9a7084c8857400621c34ed633039ed59e9f0b97f58e8
     volumes: ["./docker_volumes/db:/var/lib/postgresql/data"]
 
   web:
