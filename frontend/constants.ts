@@ -52,20 +52,21 @@ export namespace ToolTips {
 
   // Hardware Settings: Homing and Calibration
   export const HOMING =
-    trim(`If encoders or end-stops are enabled, home axis (find zero).`);
+    trim(`If encoders, stall detection, or end-stops are enabled,
+    home axis (find zero).`);
 
   export const CALIBRATION =
-    trim(`If encoders or end-stops are enabled, home axis and determine
-    maximum.`);
+    trim(`If encoders, stall detection, or end-stops are enabled, home
+    axis and determine maximum.`);
 
   export const SET_ZERO_POSITION =
     trim(`Set the current location as zero.`);
 
   export const FIND_HOME_ON_BOOT =
-    trim(`If encoders or end-stops are enabled, find the home position
-    when the device powers on.
+    trim(`If encoders, stall detection, or end-stops are enabled,
+    find the home position when the device powers on.
     Warning! This will perform homing on all axes when the
-    device powers on. Encoders or endstops must be enabled.
+    device powers on. Encoders, stall detection, or endstops must be enabled.
     It is recommended to make sure homing works properly before enabling
     this feature. (default: disabled)`);
 
@@ -141,8 +142,8 @@ export namespace ToolTips {
 
   // Hardware Settings: Encoders and Endstops
   export const ENABLE_ENCODERS =
-    trim(`Enable use of rotary encoders for stall detection,
-    calibration and homing. (default: enabled)`);
+    trim(`Enable use of rotary encoders or motor stall detection for
+    detecting missed steps, calibration, and homing. (default: enabled)`);
 
   export const ENCODER_POSITIONING =
     trim(`Use encoders for positioning. (default: disabled)`);
@@ -152,8 +153,8 @@ export namespace ToolTips {
     (default: disabled)`);
 
   export const MAX_MISSED_STEPS =
-    trim(`Number of steps missed (determined by encoder) before motor is
-    considered to have stalled. (default: 5)`);
+    trim(`Number of steps missed (determined by encoder or stall detection)
+    before motor is considered to have stalled. (default: 5)`);
 
   export const ENCODER_MISSED_STEP_DECAY =
     trim(`Reduction to missed step total for every good step. (default: 5)`);
@@ -263,8 +264,8 @@ export namespace ToolTips {
 
   export const FIND_HOME =
     trim(`The Find Home step instructs the device to perform a homing
-    command (using encoders or endstops) to find and set zero for
-    the chosen axis or axes.`);
+    command (using encoders, stall detection, or endstops) to find and set
+    zero for the chosen axis or axes.`);
 
   export const IF =
     trim(`Execute a sequence if a condition is satisfied. If the condition
@@ -715,8 +716,8 @@ export namespace Content {
 
   export const END_DETECTION_DISABLED =
     trim(`This command will not execute correctly because you do not have
-    encoders or endstops enabled for the chosen axis. Enable endstops or
-    encoders from the Device page for: `);
+    encoders, stall detection, or endstops enabled for the chosen axis.
+    Enable encoders, stall detection, or endstops from the Device page for: `);
 
   export const IN_USE =
     trim(`Used in another resource. Protected from deletion.`);
