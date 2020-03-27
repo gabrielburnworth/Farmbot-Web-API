@@ -9,6 +9,7 @@ module PointGroups
           end
           hash(:string_eq) { array :*, class: String }
           hash(:number_eq) { array :*, class: Integer }
+          hash(:boolean_eq) { array :*, class: Boolean }
           hash(:number_lt) { integer :* }
           hash(:number_gt) { integer :* }
         end
@@ -34,7 +35,7 @@ module PointGroups
 
     def validate_sort_type
       if sort_type
-        bad_sort_type! unless valid_point_type?
+        bad_sort_type! unless valid_sort_type?
       end
     end
 
@@ -44,7 +45,7 @@ module PointGroups
                 PointGroup::BAD_SORT % { value: sort_type }
     end
 
-    def valid_point_type?
+    def valid_sort_type?
       PointGroup::SORT_TYPES.include?(sort_type)
     end
   end

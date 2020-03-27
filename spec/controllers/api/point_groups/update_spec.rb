@@ -57,6 +57,7 @@ describe Api::PointGroupsController do
         number_eq: { z: [24, 25, 26] },
         number_lt: { x: 4, y: 4 },
         number_gt: { x: 1, y: 1 },
+        boolean_eq: { gantry_mounted: [true] },
         day: { op: "<", days_ago: 0 },
       },
     }
@@ -68,6 +69,7 @@ describe Api::PointGroupsController do
         number_eq: { x: [42, 52, 62] },
         number_lt: { y: 8 },
         number_gt: { z: 2 },
+        boolean_eq: { gantry_mounted: [false] },
         day: { op: ">", days_ago: 10 },
       },
     }
@@ -75,6 +77,7 @@ describe Api::PointGroupsController do
     expect(response.status).to eq(200)
     expect(json.dig(:criteria, :day, :days_ago)).to eq(10)
     expect(json.dig(:criteria, :day, :op)).to eq(">")
+    expect(json.dig(:criteria, :boolean_eq, :gantry_mounted)).to eq(false)
     expect(json.dig(:criteria, :number_eq, :x)).to eq([42, 52, 62])
     expect(json.dig(:criteria, :number_eq, :z)).to eq(nil)
     expect(json.dig(:criteria, :number_gt, :x)).to eq(nil)

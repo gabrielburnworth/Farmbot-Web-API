@@ -316,6 +316,7 @@ export function fakeWebAppConfig(): TaggedWebAppConfig {
     show_historic_points: false,
     time_format_24_hour: false,
     show_pins: false,
+    show_weeds: false,
     show_zones: false,
     disable_emergency_unlock_confirmation: false,
     map_size_x: 2900,
@@ -459,9 +460,11 @@ export function fakePointGroup(): TaggedPointGroup {
     name: "Fake",
     sort_type: "xy_ascending",
     point_ids: [],
+    group_type: [],
     criteria: {
-      day: { op: "<", days_ago: 0 },
+      day: undefined,
       number_eq: {},
+      boolean_eq: {},
       number_gt: {},
       number_lt: {},
       string_eq: {}

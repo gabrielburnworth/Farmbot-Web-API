@@ -6,6 +6,7 @@ module PointGroups
       model :device, class: Device
       string :name
       array :point_ids, class: Integer
+      array :group_type, class: String
     end
 
     criteria
@@ -25,6 +26,7 @@ module PointGroups
         PointGroupItem.transaction do
           pg = PointGroup.new(name: name,
             device: device,
+            group_type: group_type,
             criteria: PointGroup::DEFAULT_CRITERIA.merge(criteria || {})
           )
           add_point_group_items(pg)

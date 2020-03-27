@@ -68,6 +68,9 @@ describe Api::PointGroupsController do
           x: 1,
           y: 1,
         },
+        boolean_eq: {
+          gantry_mounted: [true],
+        },
         day: {
           op: "<",
           days_ago: 0,
@@ -84,6 +87,7 @@ describe Api::PointGroupsController do
     expect(hash.dig(:number_lt, :y)).to eq(4)
     expect(hash.dig(:number_gt, :x)).to eq(1)
     expect(hash.dig(:number_gt, :y)).to eq(1)
+    expect(hash.dig(:boolean_eq, :gantry_mounted)).to eq(true)
     expect(hash.dig(:day, :op)).to eq("<")
     expect(hash.dig(:day, :days_ago)).to eq(0)
     expect(hash.dig(:string_eq, :openfarm_slug)).to eq(["carrot"])
